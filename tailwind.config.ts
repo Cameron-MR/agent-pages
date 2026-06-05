@@ -5,6 +5,9 @@ const config: Config = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    // Mock data files define some utility classes as strings (for example the
+    // listing swatch gradients). Scan lib so those classes are not purged.
+    "./src/lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {

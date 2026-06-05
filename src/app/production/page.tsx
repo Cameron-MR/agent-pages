@@ -61,21 +61,26 @@ export default function ProductionPage() {
           Closed volume by month
         </h2>
         <p className="mb-6 text-xs text-body">Last six months, fabricated.</p>
-        <div className="flex h-56 items-end gap-3 sm:gap-6">
+        <div className="flex h-64 items-stretch gap-3 sm:gap-6">
           {MONTHLY_VOLUME.map((m) => {
-            const h = Math.round((m.volume / maxVolume) * 100);
+            const h = Math.max(4, Math.round((m.volume / maxVolume) * 100));
             return (
               <div
                 key={m.month}
-                className="group flex flex-1 flex-col items-center justify-end gap-2"
+                className="group flex flex-1 flex-col items-center gap-2"
               >
-                <span className="text-xs font-semibold text-mr-base opacity-0 transition-opacity group-hover:opacity-100">
-                  ${(m.volume / 1000000).toFixed(2)}M
-                </span>
-                <div
-                  className="w-full rounded-t-lg bg-gradient-to-t from-mr-base to-mr-light shadow-inner transition-all duration-500"
-                  style={{ height: `${h}%` }}
-                />
+                {/* Bar track: a flex-1 column so the bar's percentage height
+                    resolves against a real pixel height, not an auto height. */}
+                <div className="flex w-full flex-1 items-end">
+                  <div
+                    className="relative w-full rounded-t-lg bg-gradient-to-t from-mr-base to-mr-light shadow-inner transition-all duration-500"
+                    style={{ height: `${h}%` }}
+                  >
+                    <span className="absolute -top-5 left-0 right-0 text-center text-xs font-semibold text-mr-base opacity-0 transition-opacity group-hover:opacity-100">
+                      ${(m.volume / 1000000).toFixed(2)}M
+                    </span>
+                  </div>
+                </div>
                 <span className="text-xs text-body">{m.month}</span>
               </div>
             );

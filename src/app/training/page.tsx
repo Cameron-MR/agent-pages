@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import PageShell from "@/components/PageShell";
+import { useStub } from "@/components/pageShellContext";
 import { COURSES, TRACKS, type Course, type Track } from "@/lib/mock/training";
 
 type TrackFilter = "All" | Track;
@@ -79,9 +80,11 @@ export default function TrainingPage() {
 }
 
 function CourseCard({ course }: { course: Course }) {
+  const openStub = useStub();
   const pct = Math.round((course.completedLessons / course.lessons) * 100);
   const done = pct === 100;
   const started = course.completedLessons > 0;
+  const cta = done ? "Review" : started ? "Continue" : "Start";
 
   return (
     <div className="flex h-full flex-col rounded-2xl border border-white/60 bg-white/60 p-5 shadow-sm backdrop-blur-xl backdrop-saturate-150 transition duration-200 hover:-translate-y-0.5 hover:border-mr-light/50 hover:shadow-md">
@@ -106,13 +109,22 @@ function CourseCard({ course }: { course: Course }) {
 
       <button
         type="button"
+        onClick={() =>
+          openStub({
+            kind: `Training · ${course.track}`,
+            title: course.title,
+            detail: `${cta} this course. The live player would open lesson ${
+              done ? course.lessons : course.completedLessons + 1
+            } of ${course.lessons} with video, notes, and a quiz. Progress is fabricated for this reference build.`,
+          })
+        }
         className={`mt-4 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
           done
             ? "border border-mr-base/20 bg-white/70 text-mr-base hover:bg-white"
             : "bg-mr-base text-white hover:bg-mr-mid"
         }`}
       >
-        {done ? "Review" : started ? "Continue" : "Start"}
+        {cta}
       </button>
     </div>
   );

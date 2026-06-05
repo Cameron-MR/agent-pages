@@ -1,33 +1,42 @@
 "use client";
 
+import Link from "next/link";
 import Logo from "@/components/Logo";
-import { NAV_ITEMS, CURRENT_AGENT, type StubContent } from "@/lib/mockData";
+import { SUBNAV_ITEMS, CURRENT_AGENT, type StubContent } from "@/lib/mockData";
 
 interface TopNavProps {
   onOpenStub: (content: StubContent) => void;
 }
 
-// Light, glassy, sticky top navigation. Teal logotype on the left, placeholder
-// nav links in the middle, and a clickable agent chip on the right.
+// Light, glassy, sticky top navigation. Teal logotype on the left, real route
+// links in the middle (shared with every subpage), and a clickable agent chip
+// on the right. Dashboard is the active item on the home page.
 export default function TopNav({ onOpenStub }: TopNavProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-mr-base/10 bg-surface-light/70 backdrop-blur-xl backdrop-saturate-150">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-8">
-          <a href="#dashboard" aria-label="Marshall Reddick home">
+          <Link href="/" aria-label="Marshall Reddick home">
             <Logo theme="light" variant="logotype" width={170} priority />
-          </a>
+          </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
-            {NAV_ITEMS.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="rounded-full px-3.5 py-2 text-sm font-medium text-body transition-colors hover:bg-mr-pale/20 hover:text-mr-base"
-              >
-                {item.label}
-              </a>
-            ))}
+            {SUBNAV_ITEMS.map((item) => {
+              const isActive = item.href === "/";
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-mr-base text-white shadow-sm"
+                      : "text-body hover:bg-mr-pale/20 hover:text-mr-base"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
         </div>
 
