@@ -92,7 +92,7 @@ export default function SettingsPage() {
             <Photo
               src={draft.photo}
               alt={draft.name}
-              className="h-16 w-16 rounded-full object-cover ring-4 ring-white/25"
+              className="h-16 w-16 rounded-full object-cover object-[center_20%] ring-4 ring-white/25"
             />
             <p className="mt-3 font-heading text-lg font-bold">{draft.name}</p>
             <p className="text-sm text-white/80">{draft.title}</p>

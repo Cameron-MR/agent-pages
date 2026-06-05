@@ -36,7 +36,7 @@ export default function HeroBanner() {
                 src={agent.photo}
                 alt={agent.name}
                 onError={() => setPhotoOk(false)}
-                className="h-24 w-24 rounded-full object-cover"
+                className="h-24 w-24 rounded-full object-cover object-[center_20%]"
               />
             ) : (
               <div className="flex h-24 w-24 items-center justify-center rounded-full bg-mr-base text-2xl font-bold text-white">

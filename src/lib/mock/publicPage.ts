@@ -1,7 +1,7 @@
 // Mock data for the public client-facing page (/p/[slug]).
 // Fabricated agent profile, listings, sales, and testimonials. Not real.
 
-import { propertyPhoto, headshot } from "@/lib/mock/images";
+import { propertyPhoto, headshot, familyPhoto } from "@/lib/mock/images";
 
 export interface PublicListing {
   id: string;
@@ -39,8 +39,11 @@ export const PUBLIC_AGENT = {
   email: "jordan.sample@example.com",
   license: "DRE# 02000000",
   photo: headshot(0, 400),
+  familyPhoto: familyPhoto(0, 900),
   headline: "Your trusted guide to Orange County real estate.",
   bio: "Jordan helps buyers and sellers across Orange County move with confidence. Backed by the Marshall Reddick platform, every client gets sharp pricing, full-service marketing, and a smooth path to close. This is fabricated sample content for a reference design.",
+  personalBio:
+    "I was born and raised in Orange County, and I still can't imagine living anywhere else. When I'm not helping clients find their next home, you'll find me at the beach with my wife and two kids, coaching weekend soccer, or hunting down the best taco spot in town. Real estate is personal for me. I treat every client like a neighbor, because most of them become one. This is fabricated sample content for a reference design.",
   specialties: [
     "Buyer's Agent",
     "Listing Agent",

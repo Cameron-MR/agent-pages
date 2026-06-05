@@ -82,7 +82,7 @@ export default function PublicPage() {
                 <Photo
                   src={PUBLIC_AGENT.photo}
                   alt={PUBLIC_AGENT.name}
-                  className="h-20 w-20 flex-none rounded-full object-cover ring-4 ring-white/30"
+                  className="h-20 w-20 flex-none rounded-full object-cover object-[center_20%] ring-4 ring-white/30"
                 />
                 <div>
                   <p className="font-heading text-xl font-bold">
@@ -199,8 +199,8 @@ export default function PublicPage() {
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <Photo
-            src={PUBLIC_AGENT.photo}
-            alt={PUBLIC_AGENT.name}
+            src={PUBLIC_AGENT.familyPhoto}
+            alt={`${PUBLIC_AGENT.name} and family`}
             className="h-80 w-full rounded-3xl object-cover shadow-lg"
           />
           <div>
@@ -211,7 +211,7 @@ export default function PublicPage() {
               Get to know {PUBLIC_AGENT.name.split(" ")[0]}
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-body">
-              {PUBLIC_AGENT.bio}
+              {PUBLIC_AGENT.personalBio}
             </p>
             <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-mr-base">
               Specialties

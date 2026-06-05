@@ -3,6 +3,9 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
+import Photo from "@/components/Photo";
+import { useAgentProfile } from "@/components/AgentProfileProvider";
+import { LISTINGS } from "@/lib/mock/listings";
 import {
   AUDIENCES,
   AUDIENCE_HEADLINES,
@@ -184,34 +187,62 @@ function PhonePreview({
   enabledIds: Set<string>;
 }) {
   const has = (id: string) => enabledIds.has(id);
+  const { profile, initials } = useAgentProfile();
+  const featured = LISTINGS.filter((l) => l.status !== "Sold").slice(0, 2);
 
   return (
     <div className="mx-auto w-full max-w-[20rem] overflow-hidden rounded-[2.5rem] border-[6px] border-mr-dark bg-mr-dark shadow-2xl">
-      <div className="h-6 bg-mr-dark" />
+      <div className="flex h-6 items-center justify-center bg-mr-dark">
+        <span className="h-1.5 w-16 rounded-full bg-white/25" />
+      </div>
       <div className="max-h-[34rem] overflow-y-auto bg-surface-light">
-        {/* Hero */}
+        {/* Hero over a property photo, like the live public page */}
         {has("hero") ? (
-          <div className="relative bg-gradient-to-br from-mr-base to-mr-dark p-5 text-white">
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20 text-sm font-bold">
-                JS
-              </span>
-              <div>
-                <p className="font-heading text-sm font-bold">Jordan Sample</p>
-                <p className="text-xs text-white/80">Marshall Reddick</p>
+          <div className="relative text-white">
+            <Photo
+              src={featured[0]?.photo ?? ""}
+              alt="Featured home"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-br from-mr-dark/95 via-mr-dark/80 to-mr-base/70"
+            />
+            <div className="relative p-5">
+              <div className="flex items-center gap-3">
+                <Photo
+                  src={profile.photo}
+                  alt={profile.name}
+                  className="h-11 w-11 flex-none rounded-full object-cover object-[center_20%] ring-2 ring-white/40"
+                />
+                <div className="min-w-0">
+                  <p className="truncate font-heading text-sm font-bold">
+                    {profile.name}
+                  </p>
+                  <p className="truncate text-xs text-white/80">
+                    {profile.brokerage}
+                  </p>
+                </div>
+                <span className="sr-only">{initials}</span>
               </div>
+              <p className="mt-3 font-heading text-base font-bold leading-snug drop-shadow">
+                {AUDIENCE_HEADLINES[audience]}
+              </p>
+              <span className="mt-3 inline-block rounded-full bg-white px-3 py-1 text-[0.65rem] font-semibold text-mr-dark">
+                Work with me
+              </span>
             </div>
-            <p className="mt-3 font-heading text-base font-bold leading-snug">
-              {AUDIENCE_HEADLINES[audience]}
-            </p>
           </div>
         ) : null}
 
         <div className="flex flex-col gap-3 p-4">
           {has("valuation") ? (
             <PreviewBlock title="What's my home worth?" tint>
-              <div className="rounded-lg bg-white/70 p-2 text-xs text-body">
-                Enter address ...
+              <div className="flex items-center justify-between rounded-lg border border-mr-base/15 bg-white p-2 text-xs text-body">
+                Enter your address
+                <span className="rounded bg-mr-base px-2 py-0.5 text-[0.6rem] font-semibold text-white">
+                  Get value
+                </span>
               </div>
             </PreviewBlock>
           ) : null}
@@ -227,34 +258,62 @@ function PhonePreview({
           {has("rental") ? (
             <PreviewBlock title="Property management" tint>
               <p className="text-xs text-body">
-                Full-service management for your rental.
+                Full-service management for your rental, handled end to end.
               </p>
             </PreviewBlock>
           ) : null}
 
           {has("featured") ? (
-            <PreviewBlock title="Featured listings">
+            <div>
+              <p className="mb-1.5 font-heading text-xs font-bold text-mr-dark">
+                Featured listings
+              </p>
               <div className="flex gap-2">
-                {[0, 1].map((i) => (
+                {featured.map((l) => (
                   <div
-                    key={i}
-                    className="h-16 flex-1 rounded-lg bg-gradient-to-br from-mr-pale/50 to-mr-light/40"
-                  />
+                    key={l.id}
+                    className="flex-1 overflow-hidden rounded-lg border border-white/60 bg-white shadow-sm"
+                  >
+                    <Photo
+                      src={l.photo}
+                      alt={l.address}
+                      className="h-16 w-full object-cover"
+                    />
+                    <div className="p-1.5">
+                      <p className="font-heading text-[0.7rem] font-bold text-mr-base">
+                        {l.price}
+                      </p>
+                      <p className="truncate text-[0.6rem] text-body">
+                        {l.address}
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
-            </PreviewBlock>
+            </div>
           ) : null}
 
           {has("about") ? (
-            <PreviewBlock title="About Jordan">
-              <p className="text-xs text-body">
-                Orange County agent focused on a smooth, well-marketed sale.
-              </p>
-            </PreviewBlock>
+            <div className="flex gap-2 rounded-xl border border-white/60 bg-white/70 p-3">
+              <Photo
+                src={profile.photo}
+                alt={profile.name}
+                className="h-12 w-12 flex-none rounded-lg object-cover object-[center_20%]"
+              />
+              <div>
+                <p className="font-heading text-xs font-bold text-mr-dark">
+                  About {profile.name.split(" ")[0]}
+                </p>
+                <p className="text-[0.65rem] leading-snug text-body">
+                  Orange County agent focused on a smooth, well-marketed sale.
+                </p>
+              </div>
+            </div>
           ) : null}
 
           {has("testimonials") ? (
             <PreviewBlock title="What clients say" tint>
+              <p className="text-[0.6rem] text-mr-light">★★★★★</p>
               <p className="text-xs italic text-body">
                 &ldquo;Made the whole thing easy.&rdquo;
               </p>
@@ -270,7 +329,7 @@ function PhonePreview({
           {has("contact") ? (
             <PreviewBlock title="Get in touch" tint>
               <div className="rounded-lg bg-mr-base py-1.5 text-center text-xs font-semibold text-white">
-                Contact Jordan
+                Contact {profile.name.split(" ")[0]}
               </div>
             </PreviewBlock>
           ) : null}

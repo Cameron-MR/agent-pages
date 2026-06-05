@@ -41,6 +41,18 @@ export const HEADSHOT_IDS: string[] = [
   "1580489944761-15a19d654956",
 ];
 
+// Lifestyle / family photos for personal About sections. Fabricated.
+export const FAMILY_PHOTO_IDS: string[] = [
+  "1511895426328-dc8714191300",
+  "1609220136736-443140cffec6",
+  "1476703993599-0035a21b17a9",
+];
+
+export function familyPhoto(index = 0, w = 800): string {
+  const id = FAMILY_PHOTO_IDS[index % FAMILY_PHOTO_IDS.length];
+  return unsplash(id, w);
+}
+
 // Convenience: a full property photo URL by index (wraps around the set).
 export function propertyPhoto(index: number, w = 800): string {
   const id = PROPERTY_PHOTO_IDS[index % PROPERTY_PHOTO_IDS.length];

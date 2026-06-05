@@ -181,7 +181,7 @@ export default function PropertyPage() {
                 <Photo
                   src={profile.photo}
                   alt={profile.name}
-                  className="h-14 w-14 rounded-full object-cover ring-2 ring-mr-light/40"
+                  className="h-14 w-14 rounded-full object-cover object-[center_20%] ring-2 ring-mr-light/40"
                 />
                 <div>
                   <p className="font-heading text-base font-bold text-mr-dark">

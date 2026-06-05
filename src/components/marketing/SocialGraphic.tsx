@@ -71,7 +71,7 @@ export default function SocialGraphic({
             <Photo
               src={profile.photo}
               alt={profile.name}
-              className="h-9 w-9 flex-none rounded-full object-cover ring-2 ring-white/40"
+              className="h-9 w-9 flex-none rounded-full object-cover object-[center_20%] ring-2 ring-white/40"
             />
             <div className="min-w-0 leading-tight">
               <p className="truncate text-xs font-bold">{profile.name}</p>
