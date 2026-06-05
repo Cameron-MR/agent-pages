@@ -7,6 +7,7 @@ import {
   useAgentProfile,
   type AgentProfile,
 } from "@/components/AgentProfileProvider";
+import { useNavPrefs } from "@/components/NavPrefsProvider";
 
 // Settings: edit your agent profile. Saved to localStorage and reflected in
 // the nav chip and the branded calculator printouts. Fabricated defaults.
@@ -106,7 +107,123 @@ export default function SettingsPage() {
           </p>
         </div>
       </div>
+
+      <TopBarCustomizer />
     </PageShell>
+  );
+}
+
+// Reorder the nav and choose how many items show in the top bar before the
+// rest collapse into the More menu. Reads and writes the shared nav prefs.
+function TopBarCustomizer() {
+  const { items, primaryCount, setOrder, setPrimaryCount, reset } =
+    useNavPrefs();
+
+  const move = (index: number, dir: -1 | 1) => {
+    const target = index + dir;
+    if (target < 0 || target >= items.length) return;
+    const order = items.map((i) => i.href);
+    [order[index], order[target]] = [order[target], order[index]];
+    setOrder(order);
+  };
+
+  return (
+    <section className="mt-6 rounded-2xl border border-white/50 bg-white/60 p-6 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="font-heading text-lg font-bold text-mr-dark">
+            Top bar
+          </h2>
+          <p className="mt-1 text-sm text-body">
+            Reorder your navigation and choose how many items show up front. The
+            rest move into the More menu.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-body">Show first</span>
+          <div className="flex items-center gap-2 rounded-full border border-mr-base/15 bg-white/70 px-2 py-1">
+            <button
+              type="button"
+              onClick={() => setPrimaryCount(primaryCount - 1)}
+              disabled={primaryCount <= 3}
+              aria-label="Show fewer"
+              className="flex h-6 w-6 items-center justify-center rounded-full text-mr-base disabled:opacity-30 hover:bg-mr-pale/20"
+            >
+              –
+            </button>
+            <span className="w-5 text-center text-sm font-bold text-mr-dark">
+              {primaryCount}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPrimaryCount(primaryCount + 1)}
+              disabled={primaryCount >= items.length}
+              aria-label="Show more"
+              className="flex h-6 w-6 items-center justify-center rounded-full text-mr-base disabled:opacity-30 hover:bg-mr-pale/20"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-col gap-2">
+        {items.map((item, i) => {
+          const inBar = i < primaryCount;
+          return (
+            <div
+              key={item.href}
+              className={`flex items-center gap-3 rounded-xl border p-3 ${
+                inBar
+                  ? "border-mr-light/40 bg-mr-pale/15"
+                  : "border-white/60 bg-white/50"
+              }`}
+            >
+              <span className="flex flex-col">
+                <button
+                  type="button"
+                  onClick={() => move(i, -1)}
+                  disabled={i === 0}
+                  aria-label="Move up"
+                  className="text-mr-base disabled:opacity-25"
+                >
+                  ▴
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(i, 1)}
+                  disabled={i === items.length - 1}
+                  aria-label="Move down"
+                  className="text-mr-base disabled:opacity-25"
+                >
+                  ▾
+                </button>
+              </span>
+              <span className="flex-1 text-sm font-medium text-mr-dark">
+                {item.label}
+              </span>
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  inBar
+                    ? "bg-mr-base text-white"
+                    : "border border-mr-base/15 text-body"
+                }`}
+              >
+                {inBar ? "Top bar" : "More menu"}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <button
+        type="button"
+        onClick={reset}
+        className="mt-4 text-sm font-medium text-mr-base hover:text-mr-mid"
+      >
+        Reset to default
+      </button>
+    </section>
   );
 }
 

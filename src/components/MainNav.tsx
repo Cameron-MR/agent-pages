@@ -4,11 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useAgentProfile } from "@/components/AgentProfileProvider";
-import {
-  SUBNAV_ITEMS,
-  PRIMARY_NAV_COUNT,
-  NOTIFICATIONS,
-} from "@/lib/mockData";
+import { useNavPrefs } from "@/components/NavPrefsProvider";
+import { NOTIFICATIONS } from "@/lib/mockData";
 
 // Shared sticky top navigation used on the home dashboard and every subpage.
 // Primary items show inline; the rest collapse into a More dropdown. Includes
@@ -16,14 +13,15 @@ import {
 // agent chip linking to Settings.
 export default function MainNav({ active }: { active?: string }) {
   const { profile, initials } = useAgentProfile();
+  const { items, primaryCount } = useNavPrefs();
   const [moreOpen, setMoreOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLDivElement>(null);
 
-  const primary = SUBNAV_ITEMS.slice(0, PRIMARY_NAV_COUNT);
-  const overflow = SUBNAV_ITEMS.slice(PRIMARY_NAV_COUNT);
+  const primary = items.slice(0, primaryCount);
+  const overflow = items.slice(primaryCount);
   const overflowActive = overflow.some((i) => i.href === active);
 
   useEffect(() => {
@@ -230,7 +228,7 @@ export default function MainNav({ active }: { active?: string }) {
       {mobileOpen ? (
         <nav className="border-t border-mr-base/10 bg-white px-4 py-3 md:hidden">
           <div className="grid grid-cols-2 gap-2">
-            {SUBNAV_ITEMS.map((item) => (
+            {items.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
