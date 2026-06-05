@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import SocialGraphic from "@/components/marketing/SocialGraphic";
 import FlyerPrint from "@/components/marketing/FlyerPrint";
+import Photo from "@/components/Photo";
+import Logo from "@/components/Logo";
 import { useAgentProfile } from "@/components/AgentProfileProvider";
 import { LISTINGS } from "@/lib/mock/listings";
 import {
@@ -200,6 +202,55 @@ export default function MarketingStudio() {
               {emailBody.map((para, i) => (
                 <p key={i}>{para}</p>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Email signature */}
+      <section>
+        <h2 className="mb-3 font-heading text-xl font-bold text-mr-dark">
+          Email signature
+        </h2>
+        <div className="rounded-2xl border border-white/50 bg-white/60 p-5 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-mr-dark">
+              Drop this into your email client
+            </p>
+            <button
+              type="button"
+              onClick={() =>
+                copy(
+                  "signature",
+                  `${profile.name}\n${profile.title}, ${profile.brokerage}\n${profile.phone} | ${profile.email}\n${profile.license}`
+                )
+              }
+              className="rounded-full bg-mr-base px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-mr-mid"
+            >
+              {copied === "signature" ? "Copied" : "Copy signature"}
+            </button>
+          </div>
+
+          <div className="mt-4 flex items-center gap-4 rounded-xl border border-mr-base/10 bg-white p-4">
+            <Photo
+              src={profile.photo}
+              alt={profile.name}
+              className="h-16 w-16 flex-none rounded-full object-cover ring-2 ring-mr-light/30"
+            />
+            <div className="border-l-2 border-mr-base/20 pl-4">
+              <p className="font-heading text-base font-bold text-mr-dark">
+                {profile.name}
+              </p>
+              <p className="text-sm text-body">
+                {profile.title}, {profile.brokerage}
+              </p>
+              <p className="mt-1 text-sm text-mr-base">
+                {profile.phone} &nbsp;|&nbsp; {profile.email}
+              </p>
+              <p className="text-xs text-body">{profile.license}</p>
+              <div className="mt-2">
+                <Logo theme="light" variant="logotype" width={150} />
+              </div>
             </div>
           </div>
         </div>
