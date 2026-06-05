@@ -102,7 +102,11 @@ export const SUBNAV_ITEMS: NavItem[] = [
   { label: "Directory", href: "/directory" },
   { label: "Training", href: "/training" },
   { label: "Page Builder", href: "/page-builder" },
+  { label: "Settings", href: "/settings" },
 ];
+
+// How many nav items show inline before the rest collapse into a More menu.
+export const PRIMARY_NAV_COUNT = 5;
 
 // Fabricated headline metrics for the profile header.
 export const AGENT_STATS: AgentStat[] = [

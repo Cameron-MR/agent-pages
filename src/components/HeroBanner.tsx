@@ -1,18 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { agent, heroStats } from "@/lib/mockData";
+import { heroStats } from "@/lib/mockData";
+import { useAgentProfile } from "@/components/AgentProfileProvider";
 
 // Full-width hero. Agent identity on the left, four headline stats on the
 // right, all sitting on a frosted glass panel over a teal-to-pale wash.
+// Identity reads from the editable agent profile so Settings edits flow here.
 // The avatar loads a remote headshot via a plain img tag; if it fails to load
 // we fall back to the agent initials so a dead URL degrades gracefully.
 export default function HeroBanner() {
+  const { profile: agent, initials } = useAgentProfile();
   const [photoOk, setPhotoOk] = useState(true);
-  const initials = agent.name
-    .split(" ")
-    .map((part) => part[0])
-    .join("");
 
   return (
     <section className="relative overflow-hidden rounded-3xl border border-white/40 bg-white/60 p-6 shadow-xl shadow-mr-base/5 backdrop-blur-xl backdrop-saturate-150 sm:p-8">

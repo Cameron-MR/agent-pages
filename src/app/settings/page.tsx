@@ -1,0 +1,135 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import PageShell from "@/components/PageShell";
+import Photo from "@/components/Photo";
+import {
+  useAgentProfile,
+  type AgentProfile,
+} from "@/components/AgentProfileProvider";
+
+// Settings: edit your agent profile. Saved to localStorage and reflected in
+// the nav chip and the branded calculator printouts. Fabricated defaults.
+export default function SettingsPage() {
+  const { profile, setProfile, resetProfile } = useAgentProfile();
+  const [draft, setDraft] = useState<AgentProfile>(profile);
+  const [saved, setSaved] = useState(false);
+
+  // Keep the form in sync if the stored profile loads in after mount.
+  useEffect(() => {
+    setDraft(profile);
+  }, [profile]);
+
+  const field = (key: keyof AgentProfile) => (value: string) => {
+    setDraft((d) => ({ ...d, [key]: value }));
+    setSaved(false);
+  };
+
+  const onSave = () => {
+    setProfile(draft);
+    setSaved(true);
+  };
+
+  return (
+    <PageShell
+      active="/settings"
+      eyebrow="Your account"
+      title="Settings"
+      description="Edit your profile. This information personalizes your dashboard, the nav, and your branded calculator printouts."
+    >
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Form */}
+        <div className="lg:col-span-2 rounded-2xl border border-white/50 bg-white/60 p-6 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+          <h2 className="mb-4 font-heading text-lg font-bold text-mr-dark">
+            Profile
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <TextField label="Full name" value={draft.name} onChange={field("name")} />
+            <TextField label="Title" value={draft.title} onChange={field("title")} />
+            <TextField label="Brokerage" value={draft.brokerage} onChange={field("brokerage")} />
+            <TextField label="Market" value={draft.market} onChange={field("market")} />
+            <TextField label="Phone" value={draft.phone} onChange={field("phone")} />
+            <TextField label="Email" value={draft.email} onChange={field("email")} />
+            <TextField label="License" value={draft.license} onChange={field("license")} />
+            <TextField label="Photo URL" value={draft.photo} onChange={field("photo")} />
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={onSave}
+              className="rounded-full bg-mr-base px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-mr-mid"
+            >
+              Save profile
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                resetProfile();
+                setSaved(false);
+              }}
+              className="rounded-full border border-mr-base/20 bg-white/70 px-5 py-2.5 text-sm font-semibold text-mr-base transition-colors hover:bg-white"
+            >
+              Reset to sample
+            </button>
+            {saved ? (
+              <span className="rounded-full bg-mr-light/20 px-3 py-1 text-xs font-semibold text-mr-base">
+                Saved
+              </span>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Live card preview */}
+        <div className="rounded-2xl border border-white/50 bg-white/60 p-6 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+          <h2 className="mb-4 font-heading text-lg font-bold text-mr-dark">
+            Preview
+          </h2>
+          <div className="rounded-2xl border border-white/60 bg-gradient-to-br from-mr-base to-mr-dark p-5 text-white shadow-inner">
+            <Photo
+              src={draft.photo}
+              alt={draft.name}
+              className="h-16 w-16 rounded-full object-cover ring-4 ring-white/25"
+            />
+            <p className="mt-3 font-heading text-lg font-bold">{draft.name}</p>
+            <p className="text-sm text-white/80">{draft.title}</p>
+            <p className="text-sm text-mr-pale">{draft.brokerage}</p>
+            <div className="mt-3 space-y-0.5 text-xs text-white/80">
+              <p>{draft.phone}</p>
+              <p>{draft.email}</p>
+              <p>{draft.license}</p>
+              <p>{draft.market}</p>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-body">
+            This card mirrors how your details appear on branded printouts.
+          </p>
+        </div>
+      </div>
+    </PageShell>
+  );
+}
+
+function TextField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-sm font-medium text-mr-dark">
+        {label}
+      </span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-mr-base/15 bg-white px-3 py-2.5 text-sm text-mr-dark outline-none transition focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
+      />
+    </label>
+  );
+}
