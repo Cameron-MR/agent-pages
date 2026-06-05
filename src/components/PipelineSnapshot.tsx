@@ -6,7 +6,7 @@ interface PipelineSnapshotProps {
   onOpenStub: (content: StubContent) => void;
 }
 
-// Light CRM-style strip showing fabricated clients across the PMA stages.
+// Light CRM-style strip showing fabricated clients across the pipeline stages.
 // Scrolls horizontally on small screens, settles into columns on wide ones.
 export default function PipelineSnapshot({
   onOpenStub,
@@ -19,7 +19,7 @@ export default function PipelineSnapshot({
             Pipeline Snapshot
           </h2>
           <p className="mt-1 text-sm text-body">
-            Sample clients moving through the PMA stages. All names are made up.
+            Sample clients moving through the pipeline. All names are made up.
           </p>
         </div>
       </div>
@@ -49,7 +49,7 @@ export default function PipelineSnapshot({
                     onOpenStub({
                       kind: `Pipeline · ${stage.label}`,
                       title: client.name,
-                      detail: `Placeholder client card for ${client.name} (${client.detail}). The live card would show contact details, PMA status, notes, and the next scheduled touch. This is fabricated sample data.`,
+                      detail: `Placeholder client card for ${client.name} (${client.detail}). The live card would show contact details, market analysis status, notes, and the next scheduled touch. This is fabricated sample data.`,
                     })
                   }
                   className="w-full rounded-xl border border-white/70 bg-white/70 p-3 text-left shadow-sm transition-colors hover:border-mr-light/50 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-mr-light"

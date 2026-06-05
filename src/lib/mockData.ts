@@ -68,7 +68,7 @@ export interface PipelineClient {
 export interface PipelineStage {
   id: string;
   label: string;
-  // Short helper describing the PMA stage.
+  // Short helper describing the pipeline stage.
   hint: string;
   clients: PipelineClient[];
 }
@@ -94,8 +94,10 @@ export const NAV_ITEMS: NavItem[] = [
 export const SUBNAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/" },
   { label: "Pipeline", href: "/pipeline" },
+  { label: "Listings", href: "/listings" },
   { label: "Marketing", href: "/marketing" },
   { label: "Production", href: "/production" },
+  { label: "Calculators", href: "/calculators" },
   { label: "Resources", href: "/resources" },
   { label: "Directory", href: "/directory" },
   { label: "Training", href: "/training" },
@@ -352,13 +354,13 @@ export const HUB_SECTIONS: HubSectionData[] = [
   },
 ];
 
-// Pipeline snapshot organized by PMA (Property Market Analysis) stages.
-// All clients and properties are invented.
+// Pipeline snapshot organized by client pipeline stages (market analysis
+// request through follow-up). All clients and properties are invented.
 export const PIPELINE_STAGES: PipelineStage[] = [
   {
     id: "request",
     label: "Request",
-    hint: "PMA requested by the client",
+    hint: "Market analysis requested",
     clients: [
       { id: "c1", name: "Avery Placeholder", detail: "Maple Grove condo" },
       { id: "c2", name: "Devon Example", detail: "Lakeside townhome" },
@@ -377,7 +379,7 @@ export const PIPELINE_STAGES: PipelineStage[] = [
   {
     id: "completed",
     label: "Completed",
-    hint: "PMA reviewed together",
+    hint: "Analysis reviewed together",
     clients: [
       { id: "c6", name: "Jamie Notreal", detail: "Cedar Court split-level" },
     ],
@@ -522,7 +524,7 @@ export const appLaunchers: AppLauncher[] = [
   { name: "MLS (CRMLS)", desc: "Search, comps, listing input", category: "Listings" },
   { name: "Transaction Management", desc: "Manage active transactions", category: "Transactions" },
   { name: "DigiSign", desc: "E-sign for under contract documents", category: "Signing" },
-  { name: "DocuSign", desc: "E-sign for PMAs", category: "Signing" },
+  { name: "DocuSign", desc: "E-sign for disclosures and agreements", category: "Signing" },
   { name: "Marketing Suite", desc: "Branded collateral and campaigns", category: "Marketing" },
 ];
 
@@ -533,9 +535,11 @@ export interface HubEntry {
 }
 
 export const hubEntries: HubEntry[] = [
-  { name: "Pipeline", desc: "Your deals across the PMA flow", href: "/pipeline" },
+  { name: "Pipeline", desc: "Your deals from request to close", href: "/pipeline" },
+  { name: "Listings", desc: "Your active listings and status", href: "/listings" },
   { name: "Marketing Studio", desc: "Build branded client-ready material", href: "/marketing" },
   { name: "Production", desc: "Commissions, goals, leaderboard", href: "/production" },
+  { name: "Calculators", desc: "Net sheet, affordability, commission", href: "/calculators" },
   { name: "Resources & Scripts", desc: "Docs, guides, dialogue", href: "/resources" },
   { name: "Directory", desc: "Who to call: TC, broker, vendors", href: "/directory" },
   { name: "Training", desc: "Onboarding ramp and courses", href: "/training" },

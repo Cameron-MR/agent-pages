@@ -11,7 +11,7 @@ import {
 
 type SideFilter = "All" | "Buyer" | "Seller";
 
-// Pipeline board for the PMA flow. Deals live in local state so the move
+// Pipeline board for the client flow. Deals live in local state so the move
 // actions feel live: each card can shift to the previous or next stage, and
 // clicking a card opens a detail drawer. Filtering by side and a search box
 // narrow the board. All data is fabricated.
@@ -55,7 +55,7 @@ export default function PipelinePage() {
       active="/pipeline"
       eyebrow="Client Management"
       title="Pipeline"
-      description="Every client moving through the PMA flow. Drag-free stage moves, a detail drawer, and quick filters. Sample data only."
+      description="Every client moving through your pipeline, from first market analysis request to follow-up. Drag-free stage moves, a detail drawer, and quick filters. Sample data only."
     >
       {/* Controls */}
       <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-white/50 bg-white/60 p-4 shadow-sm backdrop-blur-xl backdrop-saturate-150 sm:flex-row sm:items-center sm:justify-between">
@@ -100,7 +100,7 @@ export default function PipelinePage() {
             onClick={() =>
               setOpenDeal({
                 id: "new",
-                name: "New PMA request",
+                name: "New client",
                 property: "Add a client and property",
                 side: "Seller",
                 value: "$0",
@@ -113,7 +113,7 @@ export default function PipelinePage() {
             }
             className="rounded-full bg-mr-base px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-mr-mid focus:outline-none focus-visible:ring-2 focus-visible:ring-mr-light"
           >
-            New PMA
+            Add Client
           </button>
         </div>
       </div>
@@ -322,7 +322,7 @@ function DealDrawer({
 
         <p className="mt-6 text-xs text-body">
           Placeholder client record. The live drawer would pull contact details,
-          PMA history, and scheduled touches from the CRM.
+          analysis history, and scheduled touches from the CRM.
         </p>
       </div>
     </div>

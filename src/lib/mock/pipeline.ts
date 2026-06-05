@@ -1,6 +1,7 @@
 // Mock data for the Pipeline page (/pipeline).
-// Fabricated clients moving through the Marshall Reddick PMA flow. Names,
-// properties, and numbers are invented for this reference build only.
+// Fabricated clients moving through the client pipeline, from first market
+// analysis request to follow-up. Names, properties, and numbers are invented
+// for this reference build only.
 
 export type StageId =
   | "request"
@@ -29,9 +30,9 @@ export interface StageMeta {
 }
 
 export const PIPELINE_STAGE_META: StageMeta[] = [
-  { id: "request", label: "Request", hint: "PMA requested by the client" },
+  { id: "request", label: "Request", hint: "Market analysis requested" },
   { id: "sent", label: "Sent", hint: "Analysis delivered, awaiting reply" },
-  { id: "completed", label: "Completed", hint: "PMA reviewed together" },
+  { id: "completed", label: "Completed", hint: "Analysis reviewed together" },
   {
     id: "questionnaire",
     label: "Questionnaire",
@@ -49,7 +50,7 @@ export const PIPELINE_DEALS: PipelineDeal[] = [
     value: "$815,000",
     source: "Sphere",
     lastTouch: "2 days ago",
-    nextStep: "Send PMA draft",
+    nextStep: "Send CMA draft",
     stage: "request",
     initials: "AP",
   },
@@ -73,7 +74,7 @@ export const PIPELINE_DEALS: PipelineDeal[] = [
     value: "$1,240,000",
     source: "Referral",
     lastTouch: "1 day ago",
-    nextStep: "Follow up on PMA",
+    nextStep: "Follow up on CMA",
     stage: "sent",
     initials: "RS",
   },

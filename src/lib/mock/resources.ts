@@ -36,7 +36,7 @@ export const RESOURCES: ResourceItem[] = [
     body: [
       "Open by thanking the seller and confirming the agenda for the meeting.",
       "Ask the motivation questions: timeline, reason for the move, and ideal outcome.",
-      "Bridge into the pricing conversation using the PMA you prepared.",
+      "Bridge into the pricing conversation using the CMA you prepared.",
       "Close by confirming next steps and the listing agreement.",
     ],
   },
@@ -141,7 +141,7 @@ export const RESOURCES: ResourceItem[] = [
     tags: ["Seller", "Presentation"],
     body: [
       "About you and the Marshall Reddick advantage.",
-      "Pricing strategy backed by the PMA.",
+      "Pricing strategy backed by the CMA.",
       "Marketing plan: photography, syndication, and reach.",
       "Timeline and next steps.",
     ],
