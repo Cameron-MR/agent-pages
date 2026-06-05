@@ -49,9 +49,11 @@ export default function SettingsPage() {
             <TextField label="Title" value={draft.title} onChange={field("title")} />
             <TextField label="Brokerage" value={draft.brokerage} onChange={field("brokerage")} />
             <TextField label="Market" value={draft.market} onChange={field("market")} />
-            <TextField label="Phone" value={draft.phone} onChange={field("phone")} />
+            <TextField label="Call / text phone" value={draft.phone} onChange={field("phone")} />
+            <TextField label="Office phone" value={draft.officePhone} onChange={field("officePhone")} />
             <TextField label="Email" value={draft.email} onChange={field("email")} />
             <TextField label="License" value={draft.license} onChange={field("license")} />
+            <TextField label="Office address" value={draft.address} onChange={field("address")} />
             <TextField label="Photo URL" value={draft.photo} onChange={field("photo")} />
           </div>
 

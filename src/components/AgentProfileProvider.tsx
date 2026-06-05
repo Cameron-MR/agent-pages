@@ -18,19 +18,25 @@ export interface AgentProfile {
   brokerage: string;
   market: string;
   phone: string;
+  // Office line, shown alongside the personal Call/Text number on signatures.
+  officePhone: string;
   email: string;
   license: string;
+  // Mailing address line for the email signature.
+  address: string;
   photo: string;
 }
 
 export const DEFAULT_PROFILE: AgentProfile = {
   name: "Jordan Sample",
-  title: "Real Estate Agent",
+  title: "Realtor / Advisor",
   brokerage: "Marshall Reddick Real Estate",
   market: "Orange County, CA",
   phone: "(949) 555-0142",
+  officePhone: "(949) 885-8180",
   email: "jordan.sample@example.com",
   license: "DRE# 02000000",
+  address: "4299 MacArthur Blvd, Suite 105, Newport Beach, CA 92660",
   photo: headshot(0, 400),
 };
 

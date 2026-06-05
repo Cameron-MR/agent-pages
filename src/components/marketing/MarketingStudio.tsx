@@ -3,14 +3,16 @@
 import { useMemo, useState } from "react";
 import SocialGraphic from "@/components/marketing/SocialGraphic";
 import FlyerPrint from "@/components/marketing/FlyerPrint";
-import Photo from "@/components/Photo";
-import Logo from "@/components/Logo";
 import { useAgentProfile } from "@/components/AgentProfileProvider";
 import { LISTINGS } from "@/lib/mock/listings";
 import {
   CAMPAIGNS,
   EMAIL_TEMPLATES,
   buildCaption,
+  SIGNATURE_WEBINARS,
+  SIGNATURE_SOCIAL,
+  MR_WEBSITE,
+  WIRE_FRAUD_NOTICE,
   type CampaignId,
 } from "@/lib/mock/marketing";
 
@@ -32,6 +34,28 @@ export default function MarketingStudio() {
   );
   const email = EMAIL_TEMPLATES.find((e) => e.id === emailId) ?? EMAIL_TEMPLATES[0];
   const emailBody = email.body(listing, profile);
+
+  const signatureText = [
+    profile.name,
+    profile.title,
+    profile.brokerage,
+    "Real Estate | Property Management | Private Lending",
+    "",
+    "Check out our recent webinar:",
+    ...SIGNATURE_WEBINARS.map((w) => w.label),
+    "",
+    `Call/Text: ${profile.phone}`,
+    `Office: ${profile.officePhone}`,
+    profile.email,
+    profile.license,
+    "",
+    profile.address,
+    MR_WEBSITE,
+    SIGNATURE_SOCIAL.map((s) => s.label).join(" | "),
+    "",
+    "Be Aware of Wire Fraud",
+    WIRE_FRAUD_NOTICE,
+  ].join("\n");
 
   const copy = (key: string, text: string) => {
     try {
@@ -207,50 +231,79 @@ export default function MarketingStudio() {
         </div>
       </section>
 
-      {/* Email signature */}
+      {/* Email signature (Marshall Reddick standard format) */}
       <section>
         <h2 className="mb-3 font-heading text-xl font-bold text-mr-dark">
           Email signature
         </h2>
         <div className="rounded-2xl border border-white/50 bg-white/60 p-5 shadow-sm backdrop-blur-xl backdrop-saturate-150">
-          <div className="flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between">
             <p className="text-sm font-semibold text-mr-dark">
-              Drop this into your email client
+              Standard Marshall Reddick signature, with your details
             </p>
             <button
               type="button"
-              onClick={() =>
-                copy(
-                  "signature",
-                  `${profile.name}\n${profile.title}, ${profile.brokerage}\n${profile.phone} | ${profile.email}\n${profile.license}`
-                )
-              }
+              onClick={() => copy("signature", signatureText)}
               className="rounded-full bg-mr-base px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-mr-mid"
             >
               {copied === "signature" ? "Copied" : "Copy signature"}
             </button>
           </div>
 
-          <div className="mt-4 flex items-center gap-4 rounded-xl border border-mr-base/10 bg-white p-4">
-            <Photo
-              src={profile.photo}
-              alt={profile.name}
-              className="h-16 w-16 flex-none rounded-full object-cover ring-2 ring-mr-light/30"
-            />
-            <div className="border-l-2 border-mr-base/20 pl-4">
-              <p className="font-heading text-base font-bold text-mr-dark">
-                {profile.name}
+          <div className="rounded-xl border border-mr-base/10 bg-white p-5 text-sm leading-relaxed text-mr-dark">
+            <p className="font-bold">{profile.name}</p>
+            <p className="text-body">{profile.title}</p>
+            <p className="text-body">{profile.brokerage}</p>
+            <p className="text-body">
+              Real Estate <span className="font-semibold">|</span> Property
+              Management <span className="font-semibold">|</span> Private
+              Lending
+            </p>
+
+            <p className="mt-4 font-semibold">Check out our recent webinar:</p>
+            {SIGNATURE_WEBINARS.map((w) => (
+              <a
+                key={w.label}
+                href={w.href}
+                className="block text-mr-base underline hover:text-mr-mid"
+              >
+                {w.label}
+              </a>
+            ))}
+
+            <p className="mt-4 text-body">Call/Text: {profile.phone}</p>
+            <p className="text-body">Office: {profile.officePhone}</p>
+            <a
+              href={`mailto:${profile.email}`}
+              className="text-mr-base underline hover:text-mr-mid"
+            >
+              {profile.email}
+            </a>
+            <p className="text-body">{profile.license}</p>
+
+            <p className="mt-4 text-body">{profile.address}</p>
+            <a
+              href={`https://${MR_WEBSITE}`}
+              className="text-mr-base underline hover:text-mr-mid"
+            >
+              {MR_WEBSITE}
+            </a>
+            <p className="mt-1">
+              {SIGNATURE_SOCIAL.map((s, i) => (
+                <span key={s.label}>
+                  {i > 0 ? <span className="text-mr-pale"> | </span> : null}
+                  <a href={s.href} className="text-mr-base underline hover:text-mr-mid">
+                    {s.label}
+                  </a>
+                </span>
+              ))}
+            </p>
+
+            <div className="mt-4 rounded-md border border-mr-base/20 p-3">
+              <p className="font-bold">Be Aware of Wire Fraud</p>
+              <p className="mt-1 text-xs leading-relaxed text-body">
+                {WIRE_FRAUD_NOTICE}
               </p>
-              <p className="text-sm text-body">
-                {profile.title}, {profile.brokerage}
-              </p>
-              <p className="mt-1 text-sm text-mr-base">
-                {profile.phone} &nbsp;|&nbsp; {profile.email}
-              </p>
-              <p className="text-xs text-body">{profile.license}</p>
-              <div className="mt-2">
-                <Logo theme="light" variant="logotype" width={150} />
-              </div>
             </div>
           </div>
         </div>

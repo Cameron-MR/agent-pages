@@ -55,6 +55,27 @@ export function buildCaption(
   }
 }
 
+// Standard Marshall Reddick email signature content. Webinar and social links
+// are placeholders for this reference build.
+export const SIGNATURE_WEBINARS: { label: string; href: string }[] = [
+  { label: "Long vs Short Term Rentals", href: "#" },
+  { label: "Investing in Multi-Family Real Estate", href: "#" },
+  { label: "Investing Opportunities in Austin, TX", href: "#" },
+];
+
+export const SIGNATURE_SOCIAL: { label: string; href: string }[] = [
+  { label: "Zillow Real Estate", href: "#" },
+  { label: "Zillow Property Management", href: "#" },
+  { label: "Yelp", href: "#" },
+  { label: "LinkedIn", href: "#" },
+];
+
+export const MR_WEBSITE = "marshallreddick.com";
+
+// Standard wire fraud notice that appears on Marshall Reddick signatures.
+export const WIRE_FRAUD_NOTICE =
+  "Never trust wire instructions received via email. Accepting wire instructions via email is dangerous. Before initiating a wire transfer, you must verify the wire instructions, in-person or by phone with Title and Escrow directly, with a trusted and verified phone number to ensure legitimacy. While Marshall Reddick Real Estate has taken reasonable precautions, email hacking is prevalent in real estate transactions to fraudulently misdirect funds. Marshall Reddick Real Estate cannot accept responsibility for any loss or damage arising from the acceptance of wire instructions via email. Marshall Reddick Real Estate will not send wiring instructions for real estate transactions.";
+
 export interface EmailTemplate {
   id: string;
   name: string;
