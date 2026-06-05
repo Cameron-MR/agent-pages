@@ -3,6 +3,8 @@
 // only. Do not treat any of this as real Marshall Reddick data, clients, or
 // listings. Real-estate-flavored placeholders only.
 
+import type { ReactNode } from "react";
+
 // Lightweight payload used to drive the shared stub modal. Any clickable
 // surface (tile, card, stat, chip) hands one of these to the modal so the UI
 // feels live without wiring real routes yet.
@@ -11,6 +13,9 @@ export interface StubContent {
   // Short eyebrow shown above the title, e.g. the section it came from.
   kind: string;
   detail: string;
+  // Optional rich preview rendered above the detail copy. Used by the
+  // Marketing Studio to show a larger faux asset. Plain stubs omit it.
+  preview?: ReactNode;
 }
 
 export interface NavItem {
@@ -82,6 +87,19 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Listings", href: "#resource-hub" },
   { label: "Pipeline", href: "#pipeline" },
   { label: "Page Builder", href: "#resource-hub" },
+];
+
+// Cross-page navigation used by PageShell on every subpage. These are real
+// routes that resolve to the built-out subpages.
+export const SUBNAV_ITEMS: NavItem[] = [
+  { label: "Dashboard", href: "/" },
+  { label: "Pipeline", href: "/pipeline" },
+  { label: "Marketing", href: "/marketing" },
+  { label: "Production", href: "/production" },
+  { label: "Resources", href: "/resources" },
+  { label: "Directory", href: "/directory" },
+  { label: "Training", href: "/training" },
+  { label: "Page Builder", href: "/page-builder" },
 ];
 
 // Fabricated headline metrics for the profile header.
@@ -382,4 +400,222 @@ export const PIPELINE_STAGES: PipelineStage[] = [
       { id: "c10", name: "Harper Fictional", detail: "Birchwood estate" },
     ],
   },
+];
+
+// ---------------------------------------------------------------------------
+// Command center data. All fabricated, Orange County focus. Names, numbers,
+// addresses, and contacts are invented for this reference build only.
+// ---------------------------------------------------------------------------
+
+export const agent = {
+  name: "Jordan Sample",
+  title: "Real Estate Agent, Marshall Reddick Real Estate",
+  market: "Orange County, CA",
+  phone: "(949) 555-0142",
+  email: "jordan.sample@example.com",
+  photo:
+    "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80",
+  license: "DRE# 02000000",
+};
+
+export interface HeroStat {
+  label: string;
+  value: string;
+  sub: string;
+}
+
+export const heroStats: HeroStat[] = [
+  { label: "GCI year to date", value: "$214,800", sub: "Goal $350,000" },
+  { label: "Closings MTD", value: "3", sub: "$2.41M volume" },
+  { label: "Under contract", value: "5", sub: "$4.92M volume" },
+  { label: "Active listings", value: "4", sub: "Avg 12 days on market" },
+];
+
+export interface TodayAppointment {
+  time: string;
+  label: string;
+  detail: string;
+}
+
+export interface TodayTask {
+  label: string;
+  priority: "high" | "med";
+}
+
+export interface TodayDeadline {
+  label: string;
+  detail: string;
+  due: string;
+}
+
+export interface TodayLead {
+  name: string;
+  note: string;
+  source: string;
+}
+
+export const todayItems: {
+  appointments: TodayAppointment[];
+  tasks: TodayTask[];
+  deadlines: TodayDeadline[];
+  hotLeads: TodayLead[];
+} = {
+  appointments: [
+    { time: "9:30 AM", label: "Listing presentation", detail: "18 Sea Pine, Newport Beach" },
+    { time: "12:00 PM", label: "Buyer showing", detail: "3 properties, Irvine" },
+    { time: "4:00 PM", label: "Open house prep", detail: "221 Bayview Ter, Costa Mesa" },
+  ],
+  tasks: [
+    { label: "Send CMA to the Patels", priority: "high" },
+    { label: "Order listing photos for Tustin condo", priority: "med" },
+    { label: "Call 6 follow-up leads in Follow Up Boss", priority: "high" },
+  ],
+  deadlines: [
+    { label: "Inspection contingency", detail: "12 Harbor Cove, Huntington Beach", due: "Today" },
+    { label: "EMD wire confirmation", detail: "44 Ridgeline, Mission Viejo", due: "Tomorrow" },
+    { label: "Appraisal ordered", detail: "7 Canyon Vista, Laguna Niguel", due: "Thu" },
+  ],
+  hotLeads: [
+    { name: "Maria Delgado", note: "Buyer, pre-approved $1.2M, Irvine", source: "Zillow" },
+    { name: "The Patel Family", note: "Seller, Tustin, wants CMA", source: "Referral" },
+    { name: "Kevin Wu", note: "Buyer, cash, Newport Coast", source: "Open house" },
+  ],
+};
+
+export interface MarketStat {
+  label: string;
+  value: string;
+  trend: string;
+}
+
+export const marketPulse: { region: string; stats: MarketStat[] } = {
+  region: "Orange County",
+  stats: [
+    { label: "Median sale price", value: "$1.32M", trend: "+4.1% YoY" },
+    { label: "Median days on market", value: "21", trend: "-3 days MoM" },
+    { label: "Months of inventory", value: "2.4", trend: "Seller market" },
+    { label: "Sale to list", value: "99.6%", trend: "+0.4% MoM" },
+  ],
+};
+
+export interface Announcement {
+  title: string;
+  detail: string;
+  tag: string;
+}
+
+export const announcements: Announcement[] = [
+  { title: "Q3 agent summit", detail: "Irvine HQ, registration open through Friday.", tag: "Event" },
+  { title: "New listing kit template live", detail: "Available in the Marketing Suite.", tag: "Tools" },
+  { title: "Bryan Talley closes top-10 office deal", detail: "Newport Beach, congrats.", tag: "Wins" },
+];
+
+export interface AppLauncher {
+  name: string;
+  desc: string;
+  category: string;
+}
+
+export const appLaunchers: AppLauncher[] = [
+  { name: "Follow Up Boss", desc: "Personal lead follow up and nurture", category: "CRM" },
+  { name: "SuiteCRM", desc: "Internal company data and records", category: "CRM" },
+  { name: "MLS (CRMLS)", desc: "Search, comps, listing input", category: "Listings" },
+  { name: "Transaction Management", desc: "Manage active transactions", category: "Transactions" },
+  { name: "DigiSign", desc: "E-sign for under contract documents", category: "Signing" },
+  { name: "DocuSign", desc: "E-sign for PMAs", category: "Signing" },
+  { name: "Marketing Suite", desc: "Branded collateral and campaigns", category: "Marketing" },
+];
+
+export interface HubEntry {
+  name: string;
+  desc: string;
+  href: string;
+}
+
+export const hubEntries: HubEntry[] = [
+  { name: "Pipeline", desc: "Your deals across the PMA flow", href: "/pipeline" },
+  { name: "Marketing Studio", desc: "Build branded client-ready material", href: "/marketing" },
+  { name: "Production", desc: "Commissions, goals, leaderboard", href: "/production" },
+  { name: "Resources & Scripts", desc: "Docs, guides, dialogue", href: "/resources" },
+  { name: "Directory", desc: "Who to call: TC, broker, vendors", href: "/directory" },
+  { name: "Training", desc: "Onboarding ramp and courses", href: "/training" },
+];
+
+// ---------------------------------------------------------------------------
+// Marketing Studio data. Fabricated Orange County sample listing and the
+// asset types the studio can generate from it.
+// ---------------------------------------------------------------------------
+
+export interface SampleProperty {
+  address: string;
+  price: string;
+  beds: number;
+  baths: number;
+  sqft: number;
+  lotSqft: number;
+  yearBuilt: number;
+  type: string;
+  status: string;
+  description: string;
+  features: string[];
+  photo: string;
+  gallery: string[];
+}
+
+export const sampleProperty: SampleProperty = {
+  address: "18 Sea Pine, Newport Beach, CA 92660",
+  price: "$3,495,000",
+  beds: 4,
+  baths: 4.5,
+  sqft: 3850,
+  lotSqft: 8200,
+  yearBuilt: 2019,
+  type: "Single Family",
+  status: "Coming Soon",
+  description:
+    "Coastal contemporary with white-water views, walls of glass, and an entertainer's backyard minutes from the harbor.",
+  features: [
+    "Chef's kitchen",
+    "Primary suite with ocean view",
+    "Pool and spa",
+    "3-car garage",
+    "Smart home",
+    "Walk to beach",
+  ],
+  photo:
+    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+  gallery: [
+    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80",
+  ],
+};
+
+export interface MarketingOutput {
+  id: string;
+  name: string;
+  desc: string;
+  cta: string;
+}
+
+export const marketingOutputs: MarketingOutput[] = [
+  { id: "site", name: "Property Website", desc: "A single-listing site, mobile first, with gallery, map, and lead capture.", cta: "Open site preview" },
+  { id: "brochure", name: "Print Brochure", desc: "Branded one-sheet, print ready PDF with photos and features.", cta: "Open brochure" },
+  { id: "social", name: "Social Pack", desc: "Just-listed graphics sized for Instagram, Facebook, and Stories.", cta: "Open social pack" },
+  { id: "email", name: "Email Blast", desc: "Just-listed announcement to your sphere, agent branded.", cta: "Open email" },
+];
+
+export interface MarketingTool {
+  name: string;
+  desc: string;
+  abbr: string;
+}
+
+export const marketingTools: MarketingTool[] = [
+  { name: "Property Tour Route Builder", desc: "Plan an efficient showing loop across listings.", abbr: "RT" },
+  { name: "Brochure Builder", desc: "Branded property one-sheets.", abbr: "BR" },
+  { name: "Per-Property Website Builder", desc: "A single-listing site in minutes.", abbr: "WEB" },
+  { name: "Marketing Email Builder", desc: "Just-listed and open-house blasts.", abbr: "EM" },
+  { name: "Signage and Collateral", desc: "Yard signs, riders, flyers.", abbr: "SGN" },
 ];

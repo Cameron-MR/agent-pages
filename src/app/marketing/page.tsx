@@ -2,21 +2,16 @@
 
 import { useState } from "react";
 import TopNav from "@/components/TopNav";
-import HeroBanner from "@/components/HeroBanner";
-import TodayPanel from "@/components/TodayPanel";
-import MarketPulse from "@/components/MarketPulse";
-import PipelineSnapshot from "@/components/PipelineSnapshot";
-import QuickLaunch from "@/components/QuickLaunch";
-import HubGrid from "@/components/HubGrid";
-import AnnouncementsPanel from "@/components/AnnouncementsPanel";
 import StubModal from "@/components/StubModal";
+import BrandBar from "@/components/marketing/BrandBar";
+import AddressGenerator from "@/components/marketing/AddressGenerator";
+import ToolStrip from "@/components/marketing/ToolStrip";
 import { type StubContent } from "@/lib/mockData";
 
-// Agent command center home: the daily cockpit.
-// Reads top to bottom as who I am and my numbers, what matters today, the
-// market, my pipeline, then tools and everywhere else. Apple Liquid Glass
-// aesthetic, light and airy over a soft teal wash. All data is fabricated.
-export default function Home() {
+// Marketing Studio subpage. Turn any listing into agent-branded, client-ready
+// marketing. The address generator is the headline demo moment; everything is
+// mock and clearly branded. Apple Liquid Glass aesthetic matching the home.
+export default function MarketingPage() {
   const [stub, setStub] = useState<StubContent | null>(null);
 
   return (
@@ -34,14 +29,19 @@ export default function Home() {
       <div className="relative z-10">
         <TopNav onOpenStub={setStub} />
 
-        <div className="mx-auto flex max-w-7xl flex-col gap-12 px-4 py-10 sm:px-6">
-          <HeroBanner />
-          <TodayPanel onOpenStub={setStub} />
-          <MarketPulse />
-          <PipelineSnapshot onOpenStub={setStub} />
-          <QuickLaunch onOpenStub={setStub} />
-          <HubGrid />
-          <AnnouncementsPanel />
+        <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-10 sm:px-6">
+          <header>
+            <h1 className="font-heading text-3xl font-bold tracking-tight text-mr-dark sm:text-4xl">
+              Marketing Studio
+            </h1>
+            <p className="mt-2 text-base text-body">
+              Turn any listing into agent-branded, client-ready marketing.
+            </p>
+          </header>
+
+          <BrandBar />
+          <AddressGenerator onOpenStub={setStub} />
+          <ToolStrip onOpenStub={setStub} />
         </div>
 
         <footer className="border-t border-mr-base/10 bg-white/40 backdrop-blur">

@@ -34,7 +34,9 @@ export default function StubModal({ content, onClose }: StubModalProps) {
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/70 bg-white/80 p-7 shadow-[0_30px_80px_-30px_rgba(28,60,69,0.45)] backdrop-blur-2xl backdrop-saturate-150 sm:p-8"
+        className={`relative max-h-[90vh] w-full overflow-y-auto rounded-3xl border border-white/70 bg-white/80 p-7 shadow-[0_30px_80px_-30px_rgba(28,60,69,0.45)] backdrop-blur-2xl backdrop-saturate-150 sm:p-8 ${
+          content.preview ? "max-w-2xl" : "max-w-lg"
+        }`}
       >
         {/* Soft teal wash for depth. */}
         <div
@@ -63,6 +65,13 @@ export default function StubModal({ content, onClose }: StubModalProps) {
           >
             {content.title}
           </h2>
+
+          {content.preview ? (
+            <div className="mt-5 overflow-hidden rounded-2xl border border-white/60 bg-white/50 p-4 shadow-inner">
+              {content.preview}
+            </div>
+          ) : null}
+
           <p className="mt-4 text-sm leading-relaxed text-body">
             {content.detail}
           </p>
