@@ -16,6 +16,7 @@ const COMMANDS: Command[] = [
   { label: "Pipeline", hint: "Client pipeline", href: "/pipeline", keywords: "deals clients cma" },
   { label: "Listings", hint: "Your listings", href: "/listings", keywords: "inventory homes property" },
   { label: "Marketing Studio", hint: "Build collateral", href: "/marketing", keywords: "brochure social email" },
+  { label: "Marketing Shop", hint: "Order print and swag", href: "/shop", keywords: "buy mailers door hangers business cards signs apparel order" },
   { label: "Production", hint: "Commissions and goals", href: "/production", keywords: "gci leaderboard volume" },
   { label: "Calculators", hint: "Net sheet, affordability", href: "/calculators", keywords: "math funds commission" },
   { label: "CMA Builder", hint: "Comparative market analysis", href: "/cma", keywords: "comps price valuation" },

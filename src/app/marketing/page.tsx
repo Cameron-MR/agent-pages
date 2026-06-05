@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import MainNav from "@/components/MainNav";
 import BrandBar from "@/components/marketing/BrandBar";
 import MarketingStudio from "@/components/marketing/MarketingStudio";
@@ -23,18 +24,26 @@ export default function MarketingPage() {
         <MainNav active="/marketing" />
 
         <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-10 sm:px-6">
-          <header>
-            <p className="text-xs font-semibold uppercase tracking-widest text-mr-light">
-              Marketing
-            </p>
-            <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-mr-dark sm:text-4xl">
-              Marketing Studio
-            </h1>
-            <p className="mt-2 max-w-2xl text-base text-body">
-              Turn any listing into agent-branded, client-ready marketing in
-              seconds. Pick a listing and a campaign; everything below updates
-              live and carries your details.
-            </p>
+          <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-mr-light">
+                Marketing
+              </p>
+              <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-mr-dark sm:text-4xl">
+                Marketing Studio
+              </h1>
+              <p className="mt-2 max-w-2xl text-base text-body">
+                Turn any listing into agent-branded, client-ready marketing in
+                seconds. Pick a listing and a campaign; everything below updates
+                live and carries your details.
+              </p>
+            </div>
+            <Link
+              href="/shop"
+              className="flex-none rounded-full bg-mr-base px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-mr-mid"
+            >
+              Order printed materials
+            </Link>
           </header>
 
           <BrandBar />
