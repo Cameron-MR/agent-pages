@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Raleway, Open_Sans } from "next/font/google";
 import "./globals.css";
-import { AgentProfileProvider } from "@/components/AgentProfileProvider";
+import Providers from "@/components/Providers";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${raleway.variable} ${openSans.variable}`}>
       <body className="font-body">
-        <AgentProfileProvider>{children}</AgentProfileProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

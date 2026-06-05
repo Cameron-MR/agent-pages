@@ -4,36 +4,57 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useAgentProfile } from "@/components/AgentProfileProvider";
-import { SUBNAV_ITEMS, PRIMARY_NAV_COUNT } from "@/lib/mockData";
+import {
+  SUBNAV_ITEMS,
+  PRIMARY_NAV_COUNT,
+  NOTIFICATIONS,
+} from "@/lib/mockData";
 
 // Shared sticky top navigation used on the home dashboard and every subpage.
-// Primary items show inline; the rest collapse into a More dropdown so the bar
-// stays clean as the app grows. The agent chip links to Settings.
+// Primary items show inline; the rest collapse into a More dropdown. Includes
+// a command-palette trigger, a notifications bell, a mobile menu, and the
+// agent chip linking to Settings.
 export default function MainNav({ active }: { active?: string }) {
   const { profile, initials } = useAgentProfile();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+  const bellRef = useRef<HTMLDivElement>(null);
 
   const primary = SUBNAV_ITEMS.slice(0, PRIMARY_NAV_COUNT);
   const overflow = SUBNAV_ITEMS.slice(PRIMARY_NAV_COUNT);
   const overflowActive = overflow.some((i) => i.href === active);
 
-  // Close the More menu on outside click or Escape.
   useEffect(() => {
-    if (!moreOpen) return;
     const onDown = (e: MouseEvent) => {
       if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
         setMoreOpen(false);
       }
+      if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
+        setBellOpen(false);
+      }
     };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMoreOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMoreOpen(false);
+        setBellOpen(false);
+        setMobileOpen(false);
+      }
+    };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("keydown", onKey);
     };
-  }, [moreOpen]);
+  }, []);
+
+  const openSearch = () => {
+    window.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "k", metaKey: true })
+    );
+  };
 
   const linkClass = (isActive: boolean) =>
     `rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
@@ -75,7 +96,7 @@ export default function MainNav({ active }: { active?: string }) {
               </button>
 
               {moreOpen ? (
-                <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-2xl border border-white/60 bg-white/90 p-1.5 shadow-xl backdrop-blur-xl">
+                <div className="absolute left-0 mt-2 w-52 overflow-hidden rounded-2xl border border-mr-base/10 bg-white p-1.5 shadow-xl">
                   {overflow.map((item) => (
                     <Link
                       key={item.label}
@@ -96,18 +117,136 @@ export default function MainNav({ active }: { active?: string }) {
           </nav>
         </div>
 
-        <Link
-          href="/settings"
-          className="flex items-center gap-3 rounded-full border border-mr-base/10 bg-white/60 py-1.5 pl-1.5 pr-3 shadow-sm backdrop-blur transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-mr-light"
-        >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-mr-light to-mr-base text-sm font-semibold text-white">
-            {initials}
-          </span>
-          <span className="hidden text-sm font-semibold text-mr-dark sm:block">
-            {profile.name}
-          </span>
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* Command palette trigger */}
+          <button
+            type="button"
+            onClick={openSearch}
+            className="hidden items-center gap-2 rounded-full border border-mr-base/15 bg-white/70 px-3 py-1.5 text-xs font-medium text-body transition-colors hover:bg-white sm:flex"
+          >
+            <span aria-hidden>⌕</span> Search
+            <span className="rounded border border-mr-base/15 px-1 text-[0.6rem] font-semibold">
+              ⌘K
+            </span>
+          </button>
+
+          {/* Notifications */}
+          <div className="relative" ref={bellRef}>
+            <button
+              type="button"
+              onClick={() => setBellOpen((v) => !v)}
+              aria-label="Notifications"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full border border-mr-base/10 bg-white/60 text-mr-base transition-colors hover:bg-white"
+            >
+              <svg
+                aria-hidden
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-mr-base px-1 text-[0.6rem] font-bold text-white">
+                {NOTIFICATIONS.length}
+              </span>
+            </button>
+
+            {bellOpen ? (
+              <div className="absolute right-0 mt-2 w-80 overflow-hidden rounded-2xl border border-mr-base/10 bg-white shadow-xl">
+                <div className="flex items-center justify-between border-b border-mr-base/10 px-4 py-3">
+                  <span className="font-heading text-sm font-bold text-mr-dark">
+                    Notifications
+                  </span>
+                  <span className="text-xs text-mr-base">
+                    {NOTIFICATIONS.length} new
+                  </span>
+                </div>
+                <div className="max-h-96 overflow-y-auto">
+                  {NOTIFICATIONS.map((n) => (
+                    <div
+                      key={n.id}
+                      className="flex gap-3 border-b border-mr-base/5 px-4 py-3 last:border-0 hover:bg-mr-pale/10"
+                    >
+                      <span
+                        aria-hidden
+                        className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-mr-pale/25 text-xs"
+                      >
+                        {n.kind === "lead"
+                          ? "★"
+                          : n.kind === "listing"
+                          ? "⌂"
+                          : n.kind === "transaction"
+                          ? "✓"
+                          : "•"}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-mr-dark">
+                          {n.title}
+                        </p>
+                        <p className="text-xs text-body">{n.detail}</p>
+                        <p className="mt-0.5 text-[0.65rem] text-mr-pale">
+                          {n.time}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          {/* Agent chip */}
+          <Link
+            href="/settings"
+            className="flex items-center gap-3 rounded-full border border-mr-base/10 bg-white/60 py-1.5 pl-1.5 pr-3 shadow-sm backdrop-blur transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-mr-light"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-mr-light to-mr-base text-sm font-semibold text-white">
+              {initials}
+            </span>
+            <span className="hidden text-sm font-semibold text-mr-dark lg:block">
+              {profile.name}
+            </span>
+          </Link>
+
+          {/* Mobile menu toggle */}
+          <button
+            type="button"
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="Menu"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-mr-base/10 bg-white/60 text-mr-base md:hidden"
+          >
+            <span aria-hidden>{mobileOpen ? "✕" : "☰"}</span>
+          </button>
+        </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileOpen ? (
+        <nav className="border-t border-mr-base/10 bg-white px-4 py-3 md:hidden">
+          <div className="grid grid-cols-2 gap-2">
+            {SUBNAV_ITEMS.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                  item.href === active
+                    ? "bg-mr-base text-white"
+                    : "text-mr-dark hover:bg-mr-pale/20"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      ) : null}
     </header>
   );
 }

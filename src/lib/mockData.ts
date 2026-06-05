@@ -98,6 +98,7 @@ export const SUBNAV_ITEMS: NavItem[] = [
   { label: "Marketing", href: "/marketing" },
   { label: "Production", href: "/production" },
   { label: "Calculators", href: "/calculators" },
+  { label: "CMA", href: "/cma" },
   { label: "Resources", href: "/resources" },
   { label: "Directory", href: "/directory" },
   { label: "Training", href: "/training" },
@@ -107,6 +108,53 @@ export const SUBNAV_ITEMS: NavItem[] = [
 
 // How many nav items show inline before the rest collapse into a More menu.
 export const PRIMARY_NAV_COUNT = 5;
+
+// Recent activity shown in the notifications bell. All fabricated.
+export interface AppNotification {
+  id: string;
+  title: string;
+  detail: string;
+  time: string;
+  kind: "lead" | "listing" | "transaction" | "system";
+}
+
+export const NOTIFICATIONS: AppNotification[] = [
+  {
+    id: "n1",
+    title: "New lead from Zillow",
+    detail: "Maria Delgado, buyer pre-approved to $1.2M in Irvine.",
+    time: "12 min ago",
+    kind: "lead",
+  },
+  {
+    id: "n2",
+    title: "Price reduction suggested",
+    detail: "44 Ridgeline has 21 days on market with low showing volume.",
+    time: "1 hour ago",
+    kind: "listing",
+  },
+  {
+    id: "n3",
+    title: "Disclosure signed",
+    detail: "The Patel Family completed their seller disclosure packet.",
+    time: "3 hours ago",
+    kind: "transaction",
+  },
+  {
+    id: "n4",
+    title: "Inspection contingency due",
+    detail: "12 Harbor Cove contingency expires today.",
+    time: "Today",
+    kind: "transaction",
+  },
+  {
+    id: "n5",
+    title: "New 5-star review",
+    detail: "A past client left a review on your public page.",
+    time: "Yesterday",
+    kind: "system",
+  },
+];
 
 // Fabricated headline metrics for the profile header.
 export const AGENT_STATS: AgentStat[] = [
@@ -544,6 +592,7 @@ export const hubEntries: HubEntry[] = [
   { name: "Marketing Studio", desc: "Build branded client-ready material", href: "/marketing" },
   { name: "Production", desc: "Commissions, goals, leaderboard", href: "/production" },
   { name: "Calculators", desc: "Net sheet, affordability, commission", href: "/calculators" },
+  { name: "CMA Builder", desc: "Comps and a suggested price range", href: "/cma" },
   { name: "Resources & Scripts", desc: "Docs, guides, dialogue", href: "/resources" },
   { name: "Directory", desc: "Who to call: TC, broker, vendors", href: "/directory" },
   { name: "Training", desc: "Onboarding ramp and courses", href: "/training" },

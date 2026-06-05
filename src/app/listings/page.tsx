@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import Photo from "@/components/Photo";
 import {
@@ -230,20 +231,18 @@ function ListingDrawer({
           </div>
 
           <div className="mt-6 flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full bg-mr-base px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-mr-mid"
+            <Link
+              href={`/listings/${listing.id}`}
+              className="rounded-full bg-mr-base px-5 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-mr-mid"
+            >
+              Open listing page
+            </Link>
+            <Link
+              href="/marketing"
+              className="rounded-full border border-mr-base/20 bg-white/70 px-5 py-2.5 text-center text-sm font-semibold text-mr-base transition-colors hover:bg-white"
             >
               Open marketing kit
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full border border-mr-base/20 bg-white/70 px-5 py-2.5 text-sm font-semibold text-mr-base transition-colors hover:bg-white"
-            >
-              Share listing page
-            </button>
+            </Link>
           </div>
           <p className="mt-4 text-xs text-body">
             Placeholder listing record. The live view would pull MLS details,

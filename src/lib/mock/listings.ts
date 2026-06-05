@@ -25,7 +25,20 @@ export interface Listing {
   photo: string;
   gallery: string[];
   blurb: string;
+  features?: string[];
 }
+
+// Generic feature set used when a listing has none of its own. Fabricated.
+export const DEFAULT_FEATURES: string[] = [
+  "Open-concept living",
+  "Chef's kitchen",
+  "Primary suite",
+  "Two-car garage",
+  "Private yard",
+  "Smart home wiring",
+  "Central air",
+  "Walk to amenities",
+];
 
 const gallery = (start: number): string[] => [
   propertyPhoto(start, 800),
