@@ -19,6 +19,7 @@ import {
   orderedEducation,
   type PageContent,
 } from "@/lib/mock/pageContent";
+import BuyAbility from "@/components/BuyAbility";
 import {
   PUBLIC_AGENT,
   PUBLIC_LISTINGS,
@@ -27,6 +28,7 @@ import {
   REVIEW_SOURCES,
   CLIENT_REVIEWS,
   AGENT_SERVICES,
+  PREFERRED_VENDORS,
   type EducationItem,
   type PreferredVendor,
   type CompanyEvent,
@@ -85,7 +87,7 @@ export default function PublicPage() {
           case "featured":
             return <Featured key={id} />;
           case "about":
-            return <About key={id} />;
+            return <About key={id} photos={content.photos ?? []} />;
           case "recentSales":
             return <RecentSales key={id} />;
           case "reviews":
@@ -318,7 +320,7 @@ function Featured() {
   );
 }
 
-function About() {
+function About({ photos }: { photos: string[] }) {
   const { profile } = useAgentProfile();
   const [videoOpen, setVideoOpen] = useState(false);
   return (
@@ -381,13 +383,8 @@ function About() {
               </span>
             </span>
           </button>
-          {[
-            profile.aboutPhoto,
-            propertyPhoto(7, 700),
-            propertyPhoto(8, 700),
-            propertyPhoto(10, 700),
-            propertyPhoto(11, 700),
-          ].map((src, i) => (
+          {/* Agent-managed photos from the page builder, About photo first */}
+          {[profile.aboutPhoto, ...photos].map((src, i) => (
             <div
               key={i}
               className="h-48 w-72 flex-none snap-start overflow-hidden rounded-2xl border border-white/60 shadow-sm"
@@ -549,15 +546,46 @@ function Vendors({ vendors }: { vendors: PreferredVendor[] }) {
         {vendors.map((v) => (
           <div
             key={v.id}
-            className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur"
+            className="flex flex-col rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur"
           >
-            <span className="rounded-full bg-mr-pale/25 px-2.5 py-0.5 text-xs font-semibold text-mr-base">
+            <span className="self-start rounded-full bg-mr-pale/25 px-2.5 py-0.5 text-xs font-semibold text-mr-base">
               {v.type}
             </span>
             <h3 className="mt-3 font-heading text-base font-bold text-mr-dark">
               {v.name}
             </h3>
-            <p className="mt-1 text-sm text-body">{v.blurb}</p>
+            {v.company ? (
+              <p className="text-sm font-medium text-mr-base">{v.company}</p>
+            ) : null}
+            <p className="mt-1 flex-1 text-sm text-body">{v.blurb}</p>
+            <div className="mt-3 space-y-0.5 text-xs text-body">
+              {v.phone ? (
+                <a
+                  href={`tel:${v.phone.replace(/[^0-9+]/g, "")}`}
+                  className="block hover:text-mr-base"
+                >
+                  {v.phone}
+                </a>
+              ) : null}
+              {v.email ? (
+                <a
+                  href={`mailto:${v.email}`}
+                  className="block truncate hover:text-mr-base"
+                >
+                  {v.email}
+                </a>
+              ) : null}
+            </div>
+            {v.url ? (
+              <a
+                href={v.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 rounded-full border border-mr-base/20 bg-white/70 px-4 py-2 text-center text-xs font-semibold text-mr-base transition-colors hover:bg-white"
+              >
+                Visit website
+              </a>
+            ) : null}
           </div>
         ))}
       </div>
@@ -602,17 +630,29 @@ function Events({ events }: { events: CompanyEvent[] }) {
               <p className="text-xs text-mr-pale">
                 {e.format} · {e.speakers}
               </p>
-              <button
-                type="button"
-                onClick={() => setRsvp((r) => ({ ...r, [e.id]: !r[e.id] }))}
-                className={`mt-3 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
-                  rsvp[e.id]
-                    ? "bg-white text-mr-base"
-                    : "border border-white/40 bg-white/10 text-white hover:bg-white/20"
-                }`}
-              >
-                {rsvp[e.id] ? "You're going" : "RSVP free"}
-              </button>
+              <div className="mt-3 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRsvp((r) => ({ ...r, [e.id]: !r[e.id] }))}
+                  className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
+                    rsvp[e.id]
+                      ? "bg-white text-mr-base"
+                      : "border border-white/40 bg-white/10 text-white hover:bg-white/20"
+                  }`}
+                >
+                  {rsvp[e.id] ? "You're going" : "RSVP free"}
+                </button>
+                {e.url ? (
+                  <a
+                    href={e.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full px-3 py-1.5 text-xs font-semibold text-mr-pale transition-colors hover:text-white"
+                  >
+                    Event details →
+                  </a>
+                ) : null}
+              </div>
             </div>
           ))}
         </div>
@@ -665,6 +705,18 @@ function Education({ items }: { items: EducationItem[] }) {
               <p className="mt-2 text-xs text-body">
                 {profile.name} · {item.date} · {item.length}
               </p>
+              {item.url ? (
+                <span
+                  role="link"
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    window.open(item.url, "_blank", "noopener,noreferrer");
+                  }}
+                  className="mt-2 inline-block text-xs font-semibold text-mr-base hover:text-mr-mid"
+                >
+                  {item.type === "Video" ? "Watch the full session →" : "Read the full article →"}
+                </span>
+              ) : null}
             </div>
           </button>
         ))}
@@ -728,31 +780,17 @@ function MediaLightbox({
   );
 }
 
-// Client-facing calculators with live math: what a monthly budget buys, and a
-// quick seller net estimate. Mirrors the agent-side calculators in a simpler,
-// public-friendly form.
+// Client-facing calculators: the full BuyAbility profile (shared with the
+// agent-side calculators) plus a quick seller net estimate.
 function PublicCalculators() {
   const { profile } = useAgentProfile();
   const [tab, setTab] = useState<"buy" | "sell">("buy");
-  const [monthly, setMonthly] = useState(5000);
-  const [down, setDown] = useState(100000);
   const [price, setPrice] = useState(1200000);
   const [payoff, setPayoff] = useState(450000);
 
   const fmt = (n: number) =>
     n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
-  // Buyer: invert a 30-year payment at 6.5% + 1.25% taxes/insurance.
-  const r = 0.065 / 12;
-  const n = 360;
-  let target = down;
-  for (let i = 0; i < 40; i++) {
-    const loan = Math.max(0, target - down);
-    const pi = (loan * r) / (1 - Math.pow(1 + r, -n));
-    const ti = (target * 0.0125) / 12;
-    const ratio = pi + ti > 0 ? monthly / (pi + ti) : 1.05;
-    target = target * (0.5 + 0.5 * ratio);
-  }
   // Seller: 5% commission + 1.5% closing.
   const net = price - payoff - price * 0.05 - price * 0.015;
 
@@ -790,40 +828,14 @@ function PublicCalculators() {
           </div>
 
           {tab === "buy" ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium text-mr-dark">
-                  Monthly budget
-                </span>
-                <input
-                  type="number"
-                  value={monthly}
-                  step={100}
-                  onChange={(e) => setMonthly(parseFloat(e.target.value) || 0)}
-                  className={input}
-                />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium text-mr-dark">
-                  Down payment
-                </span>
-                <input
-                  type="number"
-                  value={down}
-                  step={5000}
-                  onChange={(e) => setDown(parseFloat(e.target.value) || 0)}
-                  className={input}
-                />
-              </label>
-              <div className="sm:col-span-2 rounded-2xl bg-gradient-to-br from-mr-base to-mr-dark p-5 text-center text-white">
-                <p className="text-xs uppercase tracking-widest text-mr-pale">
-                  Estimated buying power
-                </p>
-                <p className="mt-1 font-heading text-3xl font-bold">
-                  {fmt(Math.round(target / 5000) * 5000)}
-                </p>
-              </div>
-            </div>
+            <BuyAbility
+              variant="public"
+              lender={{
+                name: PREFERRED_VENDORS[0].name,
+                company: PREFERRED_VENDORS[0].company,
+                url: PREFERRED_VENDORS[0].url,
+              }}
+            />
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="block">

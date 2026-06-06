@@ -255,8 +255,16 @@ export interface CompanyEvent {
   format: string;
   speakers: string;
   going: number;
+  // Registration / details link for the event.
+  url?: string;
+  // "CRM" events auto-sync from the company events feed; "Mine" are added by
+  // the agent in the page builder.
+  source?: "CRM" | "Mine";
 }
 
+// Auto-synced company events. TODO: replace with the live CRM events feed;
+// keep this shape (CompanyEvent). The page builder layers agent-added events
+// on top of this feed.
 export const COMPANY_EVENTS: CompanyEvent[] = [
   {
     id: "e1",
@@ -267,6 +275,8 @@ export const COMPANY_EVENTS: CompanyEvent[] = [
     format: "Online Presentation",
     speakers: "Stephanie Miller",
     going: 43,
+    url: "https://www.marshallreddick.com/events",
+    source: "CRM",
   },
   {
     id: "e2",
@@ -277,6 +287,8 @@ export const COMPANY_EVENTS: CompanyEvent[] = [
     format: "Online Presentation",
     speakers: "Brett Synicky, Michael Johnson",
     going: 31,
+    url: "https://www.marshallreddick.com/events",
+    source: "CRM",
   },
   {
     id: "e3",
@@ -287,6 +299,8 @@ export const COMPANY_EVENTS: CompanyEvent[] = [
     format: "Online Presentation",
     speakers: "Clayton Hines, Reed Hazard",
     going: 5,
+    url: "https://www.marshallreddick.com/events",
+    source: "CRM",
   },
   {
     id: "e4",
@@ -297,6 +311,8 @@ export const COMPANY_EVENTS: CompanyEvent[] = [
     format: "Online Presentation",
     speakers: "Tyler Daigler, Reed Hazard",
     going: 18,
+    url: "https://www.marshallreddick.com/events",
+    source: "CRM",
   },
 ];
 
@@ -309,8 +325,16 @@ export interface EducationItem {
   photo: string;
   // Pinned items show first on the public page.
   pinned?: boolean;
+  // Link to the recording / article.
+  url?: string;
+  // "Library" items auto-sync from the agent's education library; "Mine" are
+  // added by the agent in the page builder.
+  source?: "Library" | "Mine";
 }
 
+// Auto-synced from the agent's education library (webinars they hosted or
+// featured in). TODO: replace with the live education feed; keep this shape.
+// The page builder layers agent-added items on top.
 export const EDUCATION_ITEMS: EducationItem[] = [
   {
     id: "ed1",
@@ -319,6 +343,8 @@ export const EDUCATION_ITEMS: EducationItem[] = [
     date: "Dec 16, 2025",
     length: "61 min",
     photo: propertyPhoto(6, 600),
+    url: "https://www.marshallreddick.com/education",
+    source: "Library",
   },
   {
     id: "ed2",
@@ -327,6 +353,8 @@ export const EDUCATION_ITEMS: EducationItem[] = [
     date: "Aug 15, 2025",
     length: "33 min",
     photo: propertyPhoto(7, 600),
+    url: "https://www.marshallreddick.com/education",
+    source: "Library",
   },
   {
     id: "ed3",
@@ -335,6 +363,8 @@ export const EDUCATION_ITEMS: EducationItem[] = [
     date: "Jun 11, 2025",
     length: "4 min read",
     photo: propertyPhoto(8, 600),
+    url: "https://www.marshallreddick.com/education",
+    source: "Library",
   },
 ];
 
@@ -342,14 +372,55 @@ export interface PreferredVendor {
   id: string;
   type: string;
   name: string;
+  company: string;
   blurb: string;
+  url: string;
+  email: string;
+  phone: string;
 }
 
+// Real Marshall Reddick preferred partners (provided by Cameron).
 export const PREFERRED_VENDORS: PreferredVendor[] = [
-  { id: "vn1", type: "Lender", name: "Sample Mortgage Group", blurb: "Pre-approvals and fast closes for your buyers." },
-  { id: "vn2", type: "Title", name: "Sample Title Co", blurb: "Clear title and smooth signings, every time." },
-  { id: "vn3", type: "Escrow", name: "Sample Escrow Services", blurb: "Neutral handling of funds and documents to close." },
-  { id: "vn4", type: "Insurance", name: "Sample Insurance Agency", blurb: "Homeowner and landlord coverage quotes in a day." },
+  {
+    id: "vn1",
+    type: "Lending",
+    name: "Reed Hazard",
+    company: "CMG Home Loans",
+    blurb: "VP, Area Sales Manager. Pre-approvals and loan options for your purchase. NMLS ID# 291490.",
+    url: "https://www.cmghomeloans.com/mysite/reed-hazard",
+    email: "rhazard@cmgfi.com",
+    phone: "(949) 973-5226",
+  },
+  {
+    id: "vn2",
+    type: "Title",
+    name: "Andrew Walsh",
+    company: "WFG National Title",
+    blurb: "Sales Representative. Clear title and smooth signings, every time.",
+    url: "https://wfgtitle.com/andrew-walsh/",
+    email: "AWalsh@wfgtitle.com",
+    phone: "(949) 300-9101",
+  },
+  {
+    id: "vn3",
+    type: "Escrow",
+    name: "Rubi Lopez",
+    company: "WFG National Escrow",
+    blurb: "Escrow Officer. Neutral handling of funds and documents to close.",
+    url: "https://wfgtitle.com/rubi-lopez/",
+    email: "rlopez@wfgescrow.com",
+    phone: "(714) 452-1261",
+  },
+  {
+    id: "vn4",
+    type: "Insurance",
+    name: "Steve Page",
+    company: "Snug Harbor Insurance",
+    blurb: "Homeowner and landlord coverage quotes in a day.",
+    url: "https://snugharborinsurance.com/",
+    email: "steve.page@snugharborinsurance.com",
+    phone: "(832) 413-5019",
+  },
 ];
 
 export interface AgentService {

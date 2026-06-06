@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import PageShell from "@/components/PageShell";
+import BuyAbility from "@/components/BuyAbility";
 import BrandedPrintSheet, {
   type PrintRow,
 } from "@/components/BrandedPrintSheet";
 
-type Tool = "net" | "funds" | "afford" | "commission";
+type Tool = "buyability" | "net" | "funds" | "afford" | "commission";
 
 const TOOLS: { id: Tool; label: string; desc: string }[] = [
+  { id: "buyability", label: "Can I buy a home?", desc: "Full buying power profile" },
   { id: "net", label: "Seller net sheet", desc: "Estimate seller proceeds" },
   { id: "funds", label: "Funds to close", desc: "How much to buy" },
   { id: "afford", label: "Buyer affordability", desc: "Budget to price range" },
@@ -29,7 +31,7 @@ export default function CalculatorsPage() {
       title="Calculators"
       description="Quick math for client conversations, printable to a branded PDF with your details. Numbers are live; defaults are illustrative, not Marshall Reddick rates."
     >
-      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-5">
         {TOOLS.map((t) => (
           <button
             key={t.id}
@@ -53,7 +55,20 @@ export default function CalculatorsPage() {
         ))}
       </div>
 
-      <div className="max-w-2xl">
+      {tool === "buyability" ? (
+        <div className="rounded-2xl border border-white/50 bg-white/60 p-6 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+          <h2 className="mb-1 font-heading text-lg font-bold text-mr-dark">
+            Can I buy a home?
+          </h2>
+          <p className="mb-5 text-sm text-body">
+            A full buying-power profile: location, credit, income, and debts.
+            The same calculator lives on your public agent page.
+          </p>
+          <BuyAbility variant="agent" />
+        </div>
+      ) : null}
+
+      <div className={tool === "buyability" ? "hidden" : "max-w-2xl"}>
         {tool !== "commission" ? (
           <label className="mb-4 block">
             <span className="mb-1 block text-sm font-medium text-mr-dark">

@@ -22,6 +22,7 @@ import {
   loadContent,
   saveContent,
   defaultContent,
+  PHOTO_LIBRARY,
   type PageContent,
 } from "@/lib/mock/pageContent";
 import {
@@ -459,6 +460,7 @@ function PreviewBlock({
 // save immediately and the public page renders them.
 function ContentEditor() {
   const [content, setContent] = useState<PageContent>(defaultContent);
+  const [photoUrl, setPhotoUrl] = useState("");
 
   useEffect(() => {
     setContent(loadContent());
@@ -494,6 +496,8 @@ function ContentEditor() {
           }),
           length: "3 min read",
           photo: propertyPhoto(content.education.length + 6, 600),
+          url: "",
+          source: "Mine",
         },
       ],
     });
@@ -512,9 +516,27 @@ function ContentEditor() {
       ...content,
       vendors: [
         ...content.vendors,
-        { id: "vn" + Date.now(), type: "Lender", name: "New vendor", blurb: "" },
+        {
+          id: "vn" + Date.now(),
+          type: "Lending",
+          name: "New contact",
+          company: "",
+          blurb: "",
+          url: "",
+          email: "",
+          phone: "",
+        },
       ],
     });
+
+  // Photos shown in the public-page lifestyle carousel.
+  const addPhoto = (src: string) => {
+    const url = src.trim();
+    if (!url || content.photos.includes(url)) return;
+    persist({ ...content, photos: [...content.photos, url] });
+  };
+  const removePhoto = (src: string) =>
+    persist({ ...content, photos: content.photos.filter((p) => p !== src) });
 
   const updateEv = (id: string, patch: Partial<CompanyEvent>) =>
     persist({
@@ -537,6 +559,8 @@ function ContentEditor() {
           format: "Online Presentation",
           speakers: "",
           going: 0,
+          url: "",
+          source: "Mine",
         },
       ],
     });
@@ -546,6 +570,95 @@ function ContentEditor() {
 
   return (
     <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* Photos: the lifestyle carousel on the public page */}
+      <section className="rounded-2xl border border-white/50 bg-white/60 p-5 shadow-sm backdrop-blur-xl backdrop-saturate-150 lg:col-span-2">
+        <h2 className="font-heading text-base font-bold text-mr-dark">
+          Your page photos
+        </h2>
+        <p className="text-xs text-body">
+          These show in the lifestyle carousel in your About section. Add from
+          the approved library or paste any image link.
+        </p>
+
+        {/* Current photos */}
+        <div className="mt-3 flex flex-wrap gap-3">
+          {content.photos.map((src) => (
+            <div key={src} className="group relative">
+              <Photo
+                src={src}
+                alt="Page photo"
+                className="h-24 w-36 rounded-xl object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => removePhoto(src)}
+                aria-label="Remove photo"
+                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-mr-dark text-xs text-white shadow transition-transform hover:scale-110"
+              >
+                &times;
+              </button>
+            </div>
+          ))}
+          {content.photos.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-mr-base/20 px-6 py-8 text-xs text-body">
+              No photos yet. Add some below.
+            </p>
+          ) : null}
+        </div>
+
+        {/* Library picker */}
+        <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-mr-base">
+          Add from the library
+        </p>
+        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+          {PHOTO_LIBRARY.filter((src) => !content.photos.includes(src)).map(
+            (src) => (
+              <button
+                key={src}
+                type="button"
+                onClick={() => addPhoto(src)}
+                className="group relative flex-none focus:outline-none focus-visible:ring-2 focus-visible:ring-mr-light"
+              >
+                <Photo
+                  src={src}
+                  alt="Library photo"
+                  className="h-16 w-24 rounded-lg object-cover opacity-80 transition group-hover:opacity-100"
+                />
+                <span className="absolute inset-0 flex items-center justify-center rounded-lg bg-mr-dark/0 text-lg font-bold text-white opacity-0 transition group-hover:bg-mr-dark/30 group-hover:opacity-100">
+                  +
+                </span>
+              </button>
+            )
+          )}
+        </div>
+
+        {/* Add by URL */}
+        <div className="mt-3 flex gap-2">
+          <input
+            value={photoUrl}
+            onChange={(ev) => setPhotoUrl(ev.target.value)}
+            onKeyDown={(ev) => {
+              if (ev.key === "Enter") {
+                addPhoto(photoUrl);
+                setPhotoUrl("");
+              }
+            }}
+            className={inputCls}
+            placeholder="Paste an image link (https://...)"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              addPhoto(photoUrl);
+              setPhotoUrl("");
+            }}
+            className="flex-none rounded-full bg-mr-base px-5 py-2 text-xs font-semibold text-white hover:bg-mr-mid"
+          >
+            Add photo
+          </button>
+        </div>
+      </section>
+
       {/* Education */}
       <section className="rounded-2xl border border-white/50 bg-white/60 p-5 shadow-sm backdrop-blur-xl backdrop-saturate-150">
         <div className="mb-3 flex items-center justify-between">
@@ -568,6 +681,11 @@ function ContentEditor() {
         <div className="flex flex-col gap-3">
           {content.education.map((e) => (
             <div key={e.id} className="rounded-xl border border-white/60 bg-white/60 p-3">
+              {e.source === "Library" ? (
+                <span className="mb-2 inline-block rounded-full bg-mr-pale/25 px-2.5 py-0.5 text-[0.65rem] font-semibold text-mr-base">
+                  Auto-synced from your education library
+                </span>
+              ) : null}
               <input
                 value={e.title}
                 onChange={(ev) => updateEd(e.id, { title: ev.target.value })}
@@ -600,6 +718,12 @@ function ContentEditor() {
                   placeholder="Length"
                 />
               </div>
+              <input
+                value={e.url ?? ""}
+                onChange={(ev) => updateEd(e.id, { url: ev.target.value })}
+                className={`${inputCls} mt-2`}
+                placeholder="Link to the video or article"
+              />
               <div className="mt-2 flex items-center gap-3">
                 <button
                   type="button"
@@ -658,14 +782,40 @@ function ContentEditor() {
                   value={v.name}
                   onChange={(ev) => updateVn(v.id, { name: ev.target.value })}
                   className={`${inputCls} col-span-2`}
-                  placeholder="Vendor name"
+                  placeholder="Contact name"
                 />
               </div>
+              <input
+                value={v.company}
+                onChange={(ev) => updateVn(v.id, { company: ev.target.value })}
+                className={`${inputCls} mt-2`}
+                placeholder="Company"
+              />
               <input
                 value={v.blurb}
                 onChange={(ev) => updateVn(v.id, { blurb: ev.target.value })}
                 className={`${inputCls} mt-2`}
                 placeholder="Short description"
+              />
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <input
+                  value={v.phone}
+                  onChange={(ev) => updateVn(v.id, { phone: ev.target.value })}
+                  className={inputCls}
+                  placeholder="Phone"
+                />
+                <input
+                  value={v.email}
+                  onChange={(ev) => updateVn(v.id, { email: ev.target.value })}
+                  className={inputCls}
+                  placeholder="Email"
+                />
+              </div>
+              <input
+                value={v.url}
+                onChange={(ev) => updateVn(v.id, { url: ev.target.value })}
+                className={`${inputCls} mt-2`}
+                placeholder="Website link"
               />
               <button
                 type="button"
@@ -687,7 +837,7 @@ function ContentEditor() {
               Upcoming events
             </h2>
             <p className="text-xs text-body">
-              Curate the company events shown on your page.
+              Company events auto-sync from the CRM feed; add your own below.
             </p>
           </div>
           <button
@@ -701,6 +851,11 @@ function ContentEditor() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {content.events.map((e) => (
             <div key={e.id} className="rounded-xl border border-white/60 bg-white/60 p-3">
+              {e.source === "CRM" ? (
+                <span className="mb-2 inline-block rounded-full bg-mr-pale/25 px-2.5 py-0.5 text-[0.65rem] font-semibold text-mr-base">
+                  Auto-synced from the CRM events feed
+                </span>
+              ) : null}
               <input
                 value={e.title}
                 onChange={(ev) => updateEv(e.id, { title: ev.target.value })}
@@ -738,6 +893,12 @@ function ContentEditor() {
                 onChange={(ev) => updateEv(e.id, { speakers: ev.target.value })}
                 className={`${inputCls} mt-2`}
                 placeholder="Speakers"
+              />
+              <input
+                value={e.url ?? ""}
+                onChange={(ev) => updateEv(e.id, { url: ev.target.value })}
+                className={`${inputCls} mt-2`}
+                placeholder="Registration / details link"
               />
               <button
                 type="button"
