@@ -307,6 +307,8 @@ export interface EducationItem {
   date: string;
   length: string;
   photo: string;
+  // Pinned items show first on the public page.
+  pinned?: boolean;
 }
 
 export const EDUCATION_ITEMS: EducationItem[] = [

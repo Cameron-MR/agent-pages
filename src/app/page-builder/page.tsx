@@ -30,6 +30,7 @@ import {
 import type {
   EducationItem,
   PreferredVendor,
+  CompanyEvent,
 } from "@/lib/mock/publicPage";
 
 // Client Page Builder. The agent picks an audience, toggles modules on or off,
@@ -380,6 +381,17 @@ function PhonePreview({
             </PreviewBlock>
           ) : null}
 
+          {has("calculators") ? (
+            <PreviewBlock title="Run your numbers" tint>
+              <div className="flex items-center justify-between rounded-lg border border-mr-base/15 bg-white p-2 text-xs text-body">
+                What can I afford?
+                <span className="rounded bg-mr-base px-2 py-0.5 text-[0.6rem] font-semibold text-white">
+                  $765,000
+                </span>
+              </div>
+            </PreviewBlock>
+          ) : null}
+
           {has("contact") ? (
             <PreviewBlock title="Get in touch">
               <div className="rounded-lg bg-mr-base py-1.5 text-center text-xs font-semibold text-white">
@@ -485,6 +497,31 @@ function ContentEditor() {
       ],
     });
 
+  const updateEv = (id: string, patch: Partial<CompanyEvent>) =>
+    persist({
+      ...content,
+      events: content.events.map((e) => (e.id === id ? { ...e, ...patch } : e)),
+    });
+  const removeEv = (id: string) =>
+    persist({ ...content, events: content.events.filter((e) => e.id !== id) });
+  const addEv = () =>
+    persist({
+      ...content,
+      events: [
+        ...content.events,
+        {
+          id: "e" + Date.now(),
+          title: "New event",
+          type: "Online Event",
+          date: "TBD",
+          time: "5:00 PM PDT",
+          format: "Online Presentation",
+          speakers: "",
+          going: 0,
+        },
+      ],
+    });
+
   const inputCls =
     "w-full rounded-lg border border-mr-base/15 bg-white px-3 py-2 text-sm text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40";
 
@@ -544,13 +581,26 @@ function ContentEditor() {
                   placeholder="Length"
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => removeEd(e.id)}
-                className="mt-2 text-xs font-medium text-mr-base hover:text-mr-mid"
-              >
-                Remove
-              </button>
+              <div className="mt-2 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => updateEd(e.id, { pinned: !e.pinned })}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                    e.pinned
+                      ? "bg-mr-base text-white"
+                      : "border border-mr-base/15 text-mr-base hover:bg-mr-pale/20"
+                  }`}
+                >
+                  {e.pinned ? "Pinned (shows first)" : "Pin"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeEd(e.id)}
+                  className="text-xs font-medium text-mr-base hover:text-mr-mid"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -601,6 +651,78 @@ function ContentEditor() {
               <button
                 type="button"
                 onClick={() => removeVn(v.id)}
+                className="mt-2 text-xs font-medium text-mr-base hover:text-mr-mid"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Events */}
+      <section className="rounded-2xl border border-white/50 bg-white/60 p-5 shadow-sm backdrop-blur-xl backdrop-saturate-150 lg:col-span-2">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="font-heading text-base font-bold text-mr-dark">
+              Upcoming events
+            </h2>
+            <p className="text-xs text-body">
+              Curate the company events shown on your page.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addEv}
+            className="rounded-full border border-mr-base/20 bg-white/70 px-3 py-1.5 text-xs font-semibold text-mr-base hover:bg-white"
+          >
+            Add event
+          </button>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {content.events.map((e) => (
+            <div key={e.id} className="rounded-xl border border-white/60 bg-white/60 p-3">
+              <input
+                value={e.title}
+                onChange={(ev) => updateEv(e.id, { title: ev.target.value })}
+                className={inputCls}
+                placeholder="Event title"
+              />
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                <select
+                  value={e.type}
+                  onChange={(ev) =>
+                    updateEv(e.id, {
+                      type: ev.target.value as CompanyEvent["type"],
+                    })
+                  }
+                  className={inputCls}
+                >
+                  <option value="Online Event">Online Event</option>
+                  <option value="Vendor Event">Vendor Event</option>
+                </select>
+                <input
+                  value={e.date}
+                  onChange={(ev) => updateEv(e.id, { date: ev.target.value })}
+                  className={inputCls}
+                  placeholder="Date"
+                />
+                <input
+                  value={e.time}
+                  onChange={(ev) => updateEv(e.id, { time: ev.target.value })}
+                  className={inputCls}
+                  placeholder="Time"
+                />
+              </div>
+              <input
+                value={e.speakers}
+                onChange={(ev) => updateEv(e.id, { speakers: ev.target.value })}
+                className={`${inputCls} mt-2`}
+                placeholder="Speakers"
+              />
+              <button
+                type="button"
+                onClick={() => removeEv(e.id)}
                 className="mt-2 text-xs font-medium text-mr-base hover:text-mr-mid"
               >
                 Remove

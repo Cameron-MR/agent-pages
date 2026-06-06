@@ -15,6 +15,7 @@ import {
 import {
   loadContent,
   defaultContent,
+  orderedEducation,
   type PageContent,
 } from "@/lib/mock/pageContent";
 import {
@@ -24,10 +25,10 @@ import {
   SERVICE_AREAS,
   REVIEW_SOURCES,
   CLIENT_REVIEWS,
-  COMPANY_EVENTS,
   AGENT_SERVICES,
   type EducationItem,
   type PreferredVendor,
+  type CompanyEvent,
 } from "@/lib/mock/publicPage";
 
 // The public, client-facing page an agent shares (Surface 2). It renders the
@@ -93,9 +94,11 @@ export default function PublicPage() {
           case "vendors":
             return <Vendors key={id} vendors={content.vendors} />;
           case "events":
-            return <Events key={id} />;
+            return <Events key={id} events={content.events} />;
           case "education":
             return <Education key={id} items={content.education} />;
+          case "calculators":
+            return <PublicCalculators key={id} />;
           case "contact":
             return (
               <Contact
@@ -316,6 +319,7 @@ function Featured() {
 
 function About() {
   const { profile } = useAgentProfile();
+  const [videoOpen, setVideoOpen] = useState(false);
   return (
     <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <div className="grid items-center gap-10 lg:grid-cols-2">
@@ -356,6 +360,26 @@ function About() {
           A little more about me
         </p>
         <Carousel ariaLabel="Lifestyle gallery">
+          {/* Video tile first: swipeable like the photos, opens a player */}
+          <button
+            type="button"
+            onClick={() => setVideoOpen(true)}
+            className="relative h-48 w-72 flex-none snap-start overflow-hidden rounded-2xl border border-white/60 shadow-sm"
+          >
+            <Photo
+              src={profile.photo}
+              alt={`A note from ${profile.name.split(" ")[0]}`}
+              className="h-48 w-72 object-cover object-[center_20%]"
+            />
+            <span className="absolute inset-0 flex flex-col items-center justify-center bg-mr-dark/45">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-mr-base shadow-lg">
+                ▶
+              </span>
+              <span className="mt-2 text-xs font-semibold text-white">
+                A note from {profile.name.split(" ")[0]}
+              </span>
+            </span>
+          </button>
           {[
             profile.aboutPhoto,
             propertyPhoto(7, 700),
@@ -376,6 +400,14 @@ function About() {
           ))}
         </Carousel>
       </div>
+
+      {videoOpen ? (
+        <MediaLightbox
+          title={`A note from ${profile.name.split(" ")[0]}`}
+          kind="Video"
+          onClose={() => setVideoOpen(false)}
+        />
+      ) : null}
     </section>
   );
 }
@@ -532,7 +564,9 @@ function Vendors({ vendors }: { vendors: PreferredVendor[] }) {
   );
 }
 
-function Events() {
+function Events({ events }: { events: CompanyEvent[] }) {
+  const [rsvp, setRsvp] = useState<Record<string, boolean>>({});
+  if (events.length === 0) return null;
   return (
     <section className="bg-mr-base py-16 text-white">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -545,7 +579,7 @@ function Events() {
           </h2>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {COMPANY_EVENTS.map((e) => (
+          {events.map((e) => (
             <div
               key={e.id}
               className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur"
@@ -567,6 +601,17 @@ function Events() {
               <p className="text-xs text-mr-pale">
                 {e.format} · {e.speakers}
               </p>
+              <button
+                type="button"
+                onClick={() => setRsvp((r) => ({ ...r, [e.id]: !r[e.id] }))}
+                className={`mt-3 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
+                  rsvp[e.id]
+                    ? "bg-white text-mr-base"
+                    : "border border-white/40 bg-white/10 text-white hover:bg-white/20"
+                }`}
+              >
+                {rsvp[e.id] ? "You're going" : "RSVP free"}
+              </button>
             </div>
           ))}
         </div>
@@ -577,15 +622,18 @@ function Events() {
 
 function Education({ items }: { items: EducationItem[] }) {
   const { profile } = useAgentProfile();
+  const [openItem, setOpenItem] = useState<EducationItem | null>(null);
   if (items.length === 0) return null;
   return (
     <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <SectionHead eyebrow="Education" title="Tips and market insights" />
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-        {items.map((item) => (
-          <div
+        {orderedEducation(items).map((item) => (
+          <button
             key={item.id}
-            className="group overflow-hidden rounded-2xl border border-white/60 bg-white/70 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md"
+            type="button"
+            onClick={() => setOpenItem(item)}
+            className="group overflow-hidden rounded-2xl border border-white/60 bg-white/70 text-left shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md"
           >
             <div className="relative h-40 overflow-hidden">
               <Photo
@@ -596,6 +644,18 @@ function Education({ items }: { items: EducationItem[] }) {
               <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-xs font-semibold text-mr-base">
                 {item.type}
               </span>
+              {item.pinned ? (
+                <span className="absolute right-3 top-3 rounded-full bg-mr-base px-2.5 py-0.5 text-xs font-semibold text-white">
+                  Featured
+                </span>
+              ) : null}
+              {item.type === "Video" ? (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/85 text-mr-base shadow-lg transition-transform group-hover:scale-110">
+                    ▶
+                  </span>
+                </span>
+              ) : null}
             </div>
             <div className="p-4">
               <h3 className="font-heading text-base font-bold text-mr-dark">
@@ -605,8 +665,207 @@ function Education({ items }: { items: EducationItem[] }) {
                 {profile.name} · {item.date} · {item.length}
               </p>
             </div>
-          </div>
+          </button>
         ))}
+      </div>
+
+      {openItem ? (
+        <MediaLightbox
+          title={openItem.title}
+          kind={openItem.type}
+          onClose={() => setOpenItem(null)}
+        />
+      ) : null}
+    </section>
+  );
+}
+
+// Faux media player overlay used for education items and the About video.
+function MediaLightbox({
+  title,
+  kind,
+  onClose,
+}: {
+  title: string;
+  kind: string;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-mr-dark/70 p-4 backdrop-blur-sm"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-2xl overflow-hidden rounded-3xl bg-mr-dark shadow-2xl"
+      >
+        <div className="flex aspect-video items-center justify-center bg-gradient-to-br from-mr-base to-mr-dark">
+          <div className="text-center text-white">
+            <span className="mx-auto flex h-16 w-16 animate-pulse items-center justify-center rounded-full bg-white/15 text-2xl">
+              ▶
+            </span>
+            <p className="mt-3 text-sm text-white/80">
+              Sample {kind.toLowerCase()} player. The live page would stream the
+              real content here.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-4 bg-white p-4">
+          <p className="font-heading text-sm font-bold text-mr-dark">{title}</p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-none rounded-full bg-mr-base px-4 py-1.5 text-xs font-semibold text-white hover:bg-mr-mid"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Client-facing calculators with live math: what a monthly budget buys, and a
+// quick seller net estimate. Mirrors the agent-side calculators in a simpler,
+// public-friendly form.
+function PublicCalculators() {
+  const { profile } = useAgentProfile();
+  const [tab, setTab] = useState<"buy" | "sell">("buy");
+  const [monthly, setMonthly] = useState(5000);
+  const [down, setDown] = useState(100000);
+  const [price, setPrice] = useState(1200000);
+  const [payoff, setPayoff] = useState(450000);
+
+  const fmt = (n: number) =>
+    n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+
+  // Buyer: invert a 30-year payment at 6.5% + 1.25% taxes/insurance.
+  const r = 0.065 / 12;
+  const n = 360;
+  let target = down;
+  for (let i = 0; i < 40; i++) {
+    const loan = Math.max(0, target - down);
+    const pi = (loan * r) / (1 - Math.pow(1 + r, -n));
+    const ti = (target * 0.0125) / 12;
+    const ratio = pi + ti > 0 ? monthly / (pi + ti) : 1.05;
+    target = target * (0.5 + 0.5 * ratio);
+  }
+  // Seller: 5% commission + 1.5% closing.
+  const net = price - payoff - price * 0.05 - price * 0.015;
+
+  const input =
+    "w-full rounded-xl border border-mr-base/15 bg-white px-3 py-2.5 text-sm text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40";
+
+  return (
+    <section className="bg-gradient-to-b from-transparent to-mr-pale/15 py-16">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6">
+        <SectionHead eyebrow="Quick math" title="Run your numbers" />
+        <div className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-lg backdrop-blur sm:p-8">
+          <div className="mb-5 flex justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => setTab("buy")}
+              className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+                tab === "buy"
+                  ? "bg-mr-base text-white"
+                  : "border border-mr-base/15 bg-white/70 text-body"
+              }`}
+            >
+              What can I afford?
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("sell")}
+              className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+                tab === "sell"
+                  ? "bg-mr-base text-white"
+                  : "border border-mr-base/15 bg-white/70 text-body"
+              }`}
+            >
+              What would I net?
+            </button>
+          </div>
+
+          {tab === "buy" ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-mr-dark">
+                  Monthly budget
+                </span>
+                <input
+                  type="number"
+                  value={monthly}
+                  step={100}
+                  onChange={(e) => setMonthly(parseFloat(e.target.value) || 0)}
+                  className={input}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-mr-dark">
+                  Down payment
+                </span>
+                <input
+                  type="number"
+                  value={down}
+                  step={5000}
+                  onChange={(e) => setDown(parseFloat(e.target.value) || 0)}
+                  className={input}
+                />
+              </label>
+              <div className="sm:col-span-2 rounded-2xl bg-gradient-to-br from-mr-base to-mr-dark p-5 text-center text-white">
+                <p className="text-xs uppercase tracking-widest text-mr-pale">
+                  Estimated buying power
+                </p>
+                <p className="mt-1 font-heading text-3xl font-bold">
+                  {fmt(Math.round(target / 5000) * 5000)}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-mr-dark">
+                  Estimated sale price
+                </span>
+                <input
+                  type="number"
+                  value={price}
+                  step={10000}
+                  onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+                  className={input}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-mr-dark">
+                  Remaining loan balance
+                </span>
+                <input
+                  type="number"
+                  value={payoff}
+                  step={10000}
+                  onChange={(e) => setPayoff(parseFloat(e.target.value) || 0)}
+                  className={input}
+                />
+              </label>
+              <div className="sm:col-span-2 rounded-2xl bg-gradient-to-br from-mr-base to-mr-dark p-5 text-center text-white">
+                <p className="text-xs uppercase tracking-widest text-mr-pale">
+                  Estimated net proceeds
+                </p>
+                <p className="mt-1 font-heading text-3xl font-bold">{fmt(net)}</p>
+              </div>
+            </div>
+          )}
+
+          <p className="mt-4 text-center text-xs text-body">
+            Rough estimates, not a lending offer or guarantee.{" "}
+            <a href="#contact" className="font-semibold text-mr-base underline">
+              Ask {profile.name.split(" ")[0]} for exact numbers
+            </a>
+            .
+          </p>
+        </div>
       </div>
     </section>
   );

@@ -16,6 +16,7 @@ export type ModuleId =
   | "vendors"
   | "events"
   | "education"
+  | "calculators"
   | "contact";
 
 export interface BuilderModule {
@@ -89,6 +90,12 @@ export const BUILDER_MODULES: BuilderModule[] = [
     name: "Education",
     description: "Curated videos and articles from the agent.",
     defaultOn: ["Buyer", "Seller", "Landlord", "Public"],
+  },
+  {
+    id: "calculators",
+    name: "Calculators",
+    description: "Client-facing affordability and net-sheet calculators.",
+    defaultOn: ["Buyer", "Seller", "Public"],
   },
   {
     id: "contact",
