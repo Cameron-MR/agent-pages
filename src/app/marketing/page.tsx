@@ -52,6 +52,12 @@ export default function MarketingPage() {
                 Build a property tour
               </Link>
               <Link
+                href="/open-house"
+                className="rounded-full border border-mr-base/20 bg-white/70 px-5 py-3 text-sm font-semibold text-mr-base shadow-sm transition-colors hover:bg-white"
+              >
+                Open house kiosk
+              </Link>
+              <Link
                 href="/shop"
                 className="rounded-full bg-mr-base px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-mr-mid"
               >

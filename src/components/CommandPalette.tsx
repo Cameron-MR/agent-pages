@@ -19,6 +19,7 @@ const COMMANDS: Command[] = [
   { label: "Marketing Shop", hint: "Order print and swag", href: "/shop", keywords: "buy mailers door hangers business cards signs apparel order" },
   { label: "Tour Builder", hint: "Build a property tour", href: "/tour-builder", keywords: "tour route mls showing stops itinerary" },
   { label: "Listing Presentation", hint: "Printable appointment deck", href: "/presentation", keywords: "presentation listing appointment pitch deck print" },
+  { label: "Open House", hint: "Kiosk sign-in and leads", href: "/open-house", keywords: "open house sign-in kiosk visitors leads ipad" },
   { label: "Production", hint: "Commissions and goals", href: "/production", keywords: "gci leaderboard volume" },
   { label: "Calculators", hint: "Net sheet, affordability", href: "/calculators", keywords: "math funds commission" },
   { label: "CMA Builder", hint: "Comparative market analysis", href: "/cma", keywords: "comps price valuation" },

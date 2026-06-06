@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import {
   COMMISSION_LEDGER,
@@ -11,6 +11,29 @@ import {
   CLUB_PROGRESS,
 } from "@/lib/mock/production";
 
+// Personal goal targets are editable and persist per device.
+const GOALS_KEY = "mr-production-goals";
+
+function loadGoalTargets(): Record<string, number> {
+  try {
+    const raw = window.localStorage.getItem(GOALS_KEY);
+    const parsed = raw ? (JSON.parse(raw) as Record<string, number>) : {};
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+// Format a target the same way the sample data does ($350,000 / $18M / 24).
+function formatTarget(label: string, n: number): string {
+  if (label === "Units closed") return String(n);
+  if (n >= 1000000) {
+    const m = n / 1000000;
+    return `$${Number.isInteger(m) ? m : m.toFixed(2)}M`;
+  }
+  return `$${n.toLocaleString()}`;
+}
+
 // Production page: goal rings, a monthly volume chart, the commission ledger,
 // and the office leaderboard. Charts are pure CSS/SVG so there are no chart
 // dependencies. All numbers are fabricated.
@@ -18,6 +41,22 @@ export default function ProductionPage() {
   const [ledgerFilter, setLedgerFilter] = useState<"All" | "Paid" | "Pending">(
     "All"
   );
+  const [targets, setTargets] = useState<Record<string, number>>({});
+  const [editingGoals, setEditingGoals] = useState(false);
+
+  useEffect(() => {
+    setTargets(loadGoalTargets());
+  }, []);
+
+  const setTarget = (label: string, value: number) => {
+    const next = { ...targets, [label]: value };
+    setTargets(next);
+    try {
+      window.localStorage.setItem(GOALS_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  };
 
   const maxVolume = Math.max(...MONTHLY_VOLUME.map((m) => m.volume));
   const ledger =
@@ -35,12 +74,25 @@ export default function ProductionPage() {
       {/* President's / Chairman's Club */}
       <ClubMeter />
 
-      {/* Goal rings */}
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {/* Goal rings (targets are editable and persist) */}
+      <div className="mt-6 flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wide text-mr-base">
+          Your goals
+        </p>
+        <button
+          type="button"
+          onClick={() => setEditingGoals((v) => !v)}
+          className="rounded-full border border-mr-base/20 bg-white/70 px-4 py-1.5 text-xs font-semibold text-mr-base transition-colors hover:bg-white"
+        >
+          {editingGoals ? "Done" : "Edit goals"}
+        </button>
+      </div>
+      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {GOALS.map((goal) => {
+          const target = targets[goal.label] ?? goal.target;
           const pct = Math.min(
             100,
-            Math.round((goal.current / goal.target) * 100)
+            Math.round((goal.current / Math.max(1, target)) * 100)
           );
           return (
             <div
@@ -48,12 +100,28 @@ export default function ProductionPage() {
               className="flex items-center gap-5 rounded-2xl border border-white/50 bg-white/60 p-5 shadow-sm backdrop-blur-xl backdrop-saturate-150"
             >
               <GoalRingSvg pct={pct} />
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="text-xs font-medium text-body">{goal.label}</p>
                 <p className="mt-1 font-heading text-2xl font-bold text-mr-dark">
                   {goal.display}
                 </p>
-                <p className="text-xs text-body">of {goal.targetDisplay}</p>
+                {editingGoals ? (
+                  <div className="mt-1 flex items-center gap-1 text-xs text-body">
+                    of{" "}
+                    <input
+                      type="number"
+                      value={target}
+                      onChange={(e) =>
+                        setTarget(goal.label, parseFloat(e.target.value) || 0)
+                      }
+                      className="w-28 rounded-lg border border-mr-base/15 bg-white px-2 py-1 text-xs text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-xs text-body">
+                    of {formatTarget(goal.label, target)}
+                  </p>
+                )}
               </div>
             </div>
           );

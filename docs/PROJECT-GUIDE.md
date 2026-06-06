@@ -90,6 +90,9 @@ reuse it. Faked logic is expected; the value is the UI/UX and the data shapes.
 - **`/shop`** — Marketing Shop. Order print/signage/apparel/promo; cart,
   checkout (ship to home/office), saved cards (masked, demo), compliance
   auto-applied, order history.
+- **`/open-house`** — Open House toolkit: pick a listing, launch a
+  full-screen visitor sign-in kiosk (hand the agent's iPad to visitors);
+  captured leads list per property with text/email follow-up and CSV export.
 - **`/presentation`** — Listing Presentation builder: pick a listing and a
   "prepared for" name; the branded document renders on screen (cover, agent,
   MR advantage, marketing plan, pricing strategy, steps) and prints as-is
@@ -146,6 +149,8 @@ reuse it. Faked logic is expected; the value is the UI/UX and the data shapes.
 | `mr-notifs-read` | MainNav | "Mark all read" flag for the notifications bell |
 | `mr-training-progress` | training | Completed-lesson counts per course |
 | `mr-today-done` | TodayPanel | Checked-off Today task labels |
+| `mr-openhouse-leads` | openHouse | Kiosk sign-in leads (per device, demo) |
+| `mr-production-goals` | production | Custom goal targets for the rings |
 
 Pattern: a `load*()` returns defaults when storage is empty/invalid and repairs
 shape; a `save*()` writes JSON; builder pages write, client pages read on mount.
@@ -210,6 +215,18 @@ shape; a `save*()` writes JSON; builder pages write, client pages read on mount.
 
 Newest first. Add an entry each working session.
 
+- **Open House toolkit + editable goals.**
+  - New `/open-house`: pick a listing, launch a full-screen client-facing
+    kiosk sign-in (name, phone/email, source chips, agent question, note).
+    Each sign-in saves a lead (`mr-openhouse-leads`), the agent view lists
+    leads per property with one-tap text follow-up, email, delete, and a
+    real CSV export (`src/lib/mock/openHouse.ts`). Wired into the Marketing
+    header CTAs and the command palette. Live version posts to the lead hub.
+  - Printable branded open house welcome sign with a working QR code
+    (`marketing/OpenHouseSign.tsx`, keyless api.qrserver.com; swap for a
+    self-hosted generator in production) pointing to the agent's public page.
+  - Production goal targets are editable (Edit goals) and persist
+    (`mr-production-goals`); rings recalculate against the custom target.
 - **Agent-only tour share button.** The client tour page hides "Text this
   tour to a client" from clients. The Tour Builder opens the page with
   `?view=agent`, the only view that shows it.
