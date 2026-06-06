@@ -1,213 +1,301 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
-import BrandedPrintSheet, {
-  type PrintRow,
-} from "@/components/BrandedPrintSheet";
-import { CMA_SUBJECT, CMA_COMPS } from "@/lib/mock/cma";
+import Photo from "@/components/Photo";
+import CmaPrint from "@/components/cma/CmaPrint";
+import {
+  DEFAULT_CMA,
+  loadCma,
+  saveCma,
+  lookupCma,
+  summaryByStatus,
+  suggestedRange,
+  pricePerSqft,
+  effectivePrice,
+  money,
+  SAMPLE_CMA_IDS,
+  type Cma,
+} from "@/lib/mock/cma";
 
-const money = (n: number) =>
-  n.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  });
-
-const roundTo = (n: number, step: number) => Math.round(n / step) * step;
-
-// CMA builder: pick comparable sales, and a suggested price range for the
-// subject property is computed live from the included comps' price per sqft.
-// Printable to a branded, agent-personalized PDF. All comps are fabricated.
+// CMA builder. The agent sets a subject home by MLS ID, adds comparable
+// listings by MLS ID, and gets a live suggested price range and market summary.
+// Then preview the client report page or print the branded report. Property
+// data comes from the MLS (mocked for now). All data is fabricated.
 export default function CmaPage() {
-  const [sqft, setSqft] = useState(CMA_SUBJECT.sqft);
-  const [included, setIncluded] = useState<Set<string>>(
-    new Set(CMA_COMPS.map((c) => c.id))
+  const router = useRouter();
+  const [cma, setCma] = useState<Cma>(DEFAULT_CMA);
+  const [subjectId, setSubjectId] = useState("");
+  const [compId, setCompId] = useState("");
+
+  useEffect(() => {
+    setCma(loadCma());
+  }, []);
+
+  const setSubject = (rawId: string) => {
+    const rec = lookupCma(rawId);
+    if (!rec) return;
+    setCma((c) => ({ ...c, subject: rec }));
+    setSubjectId("");
+  };
+
+  const addComp = (rawId: string) => {
+    const rec = lookupCma(rawId);
+    if (!rec) return;
+    setCma((c) => ({
+      ...c,
+      comps: [...c.comps, { ...rec, id: rec.mlsId + "-" + Date.now() }],
+    }));
+    setCompId("");
+  };
+
+  const removeComp = (id: string) =>
+    setCma((c) => ({ ...c, comps: c.comps.filter((x) => x.id !== id) }));
+
+  const summary = useMemo(() => summaryByStatus(cma.comps), [cma.comps]);
+  const range = useMemo(
+    () => suggestedRange(cma.comps, cma.subject.sqft),
+    [cma.comps, cma.subject.sqft]
   );
 
-  const toggle = (id: string) =>
-    setIncluded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-
-  const comps = CMA_COMPS.filter((c) => included.has(c.id));
-
-  const analysis = useMemo(() => {
-    if (comps.length === 0) {
-      return { avgPsf: 0, low: 0, mid: 0, high: 0 };
-    }
-    const psfs = comps.map((c) => c.soldPrice / c.sqft);
-    const avgPsf = psfs.reduce((a, b) => a + b, 0) / psfs.length;
-    const minPsf = Math.min(...psfs);
-    const maxPsf = Math.max(...psfs);
-    return {
-      avgPsf,
-      low: roundTo(minPsf * sqft, 5000),
-      mid: roundTo(avgPsf * sqft, 5000),
-      high: roundTo(maxPsf * sqft, 5000),
-    };
-  }, [comps, sqft]);
-
-  const printRows: PrintRow[] = [
-    { label: "Average price / sqft", value: `${money(analysis.avgPsf)}/sqft` },
-    { label: "Conservative", value: money(analysis.low) },
-    { label: "Aggressive", value: money(analysis.high) },
-    { label: "Suggested list price", value: money(analysis.mid), strong: true },
-  ];
-  const printInputs: PrintRow[] = [
-    { label: "Subject", value: `${CMA_SUBJECT.address}, ${CMA_SUBJECT.city}` },
-    {
-      label: "Details",
-      value: `${CMA_SUBJECT.beds} bd / ${CMA_SUBJECT.baths} ba / ${sqft.toLocaleString()} sqft`,
-    },
-    { label: "Comparable sales used", value: String(comps.length) },
-  ];
+  const preview = () => {
+    saveCma(cma);
+    router.push("/cma/jordan-sample");
+  };
 
   return (
     <PageShell
       active="/cma"
       eyebrow="Pricing"
       title="CMA Builder"
-      description="Build a comparative market analysis. Toggle comps to refine the suggested price range, then print a branded report. Sample comps only."
+      description="Build a comparative market analysis from MLS listing IDs. Pick a subject home and comps; the suggested range and market summary update live. Preview the client report or print a branded PDF. Sample MLS data."
     >
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={() => window.print()}
-          className="flex items-center gap-2 rounded-full border border-mr-base/20 bg-white/70 px-4 py-2 text-sm font-semibold text-mr-base transition-colors hover:bg-white"
+          className="rounded-full border border-mr-base/20 bg-white/70 px-4 py-2 text-sm font-semibold text-mr-base transition-colors hover:bg-white"
         >
-          <span aria-hidden>⎙</span> Print / Save PDF
+          <span aria-hidden>⎙</span> Print report
+        </button>
+        <button
+          type="button"
+          onClick={preview}
+          className="rounded-full bg-mr-base px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-mr-mid"
+        >
+          Preview client report
         </button>
       </div>
 
-      {/* Subject + result */}
+      {/* Subject + suggested range */}
       <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="rounded-2xl border border-white/50 bg-white/60 p-6 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+        <section className="rounded-2xl border border-white/50 bg-white/60 p-5 shadow-sm backdrop-blur-xl backdrop-saturate-150">
           <h2 className="font-heading text-lg font-bold text-mr-dark">
             Subject property
           </h2>
-          <p className="mt-1 text-sm font-medium text-mr-dark">
-            {CMA_SUBJECT.address}
-          </p>
-          <p className="text-sm text-body">{CMA_SUBJECT.city}</p>
-          <p className="mt-2 text-sm text-body">
-            {CMA_SUBJECT.beds} bd · {CMA_SUBJECT.baths} ba
-          </p>
-          <label className="mt-4 block">
-            <span className="mb-1 block text-sm font-medium text-mr-dark">
-              Living area (sqft)
+          <div className="mt-3 flex gap-2">
+            <input
+              value={subjectId}
+              onChange={(e) => setSubjectId(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && setSubject(subjectId)}
+              placeholder="MLS ID (e.g., OC2001)"
+              className="flex-1 rounded-xl border border-mr-base/15 bg-white px-3 py-2 text-sm text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
+            />
+            <button
+              type="button"
+              onClick={() => setSubject(subjectId)}
+              className="rounded-full bg-mr-base px-4 py-2 text-sm font-semibold text-white hover:bg-mr-mid"
+            >
+              Set
+            </button>
+          </div>
+          <div className="mt-3 overflow-hidden rounded-xl border border-white/60">
+            <Photo
+              src={cma.subject.photo}
+              alt={cma.subject.address}
+              className="h-32 w-full object-cover"
+            />
+            <div className="p-3">
+              <p className="font-heading text-sm font-bold text-mr-dark">
+                {cma.subject.address}
+              </p>
+              <p className="text-xs text-body">{cma.subject.city}</p>
+              <p className="mt-1 text-xs text-body">
+                {cma.subject.beds} bd · {cma.subject.baths} ba ·{" "}
+                {cma.subject.sqft.toLocaleString()} sqft · {cma.subject.year}
+              </p>
+              <p className="text-xs text-mr-pale">MLS {cma.subject.mlsId}</p>
+            </div>
+          </div>
+          <label className="mt-3 block">
+            <span className="mb-1 block text-xs font-medium text-mr-dark">
+              Prepared for (client)
             </span>
             <input
-              type="number"
-              value={sqft}
-              step={50}
-              onChange={(e) => setSqft(parseFloat(e.target.value) || 0)}
-              className="w-full rounded-xl border border-mr-base/15 bg-white px-3 py-2.5 text-sm text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
+              value={cma.client}
+              onChange={(e) => setCma((c) => ({ ...c, client: e.target.value }))}
+              className="w-full rounded-xl border border-mr-base/15 bg-white px-3 py-2 text-sm text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
             />
           </label>
-        </div>
+        </section>
 
-        <div className="lg:col-span-2 rounded-2xl border border-mr-light/30 bg-gradient-to-br from-mr-base to-mr-dark p-6 text-white shadow-sm">
+        <section className="lg:col-span-2 rounded-2xl border border-mr-light/30 bg-gradient-to-br from-mr-base to-mr-dark p-6 text-white shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-widest text-mr-pale">
             Suggested list price
           </p>
           <p className="mt-2 font-heading text-4xl font-bold">
-            {money(analysis.mid)}
+            {range.mid ? money(range.mid) : "—"}
           </p>
-          <p className="mt-1 text-sm text-white/80">
-            Range {money(analysis.low)} – {money(analysis.high)} based on{" "}
-            {comps.length} comparable {comps.length === 1 ? "sale" : "sales"} at
-            an average of {money(analysis.avgPsf)}/sqft.
+          <p className="mt-1 text-sm text-white/85">
+            {range.basis
+              ? `Range ${money(range.low)} – ${money(range.high)} from ${range.basis} comps at an average of ${money(Math.round(range.avgPpsf))}/sqft.`
+              : "Add comparable listings to calculate."}
           </p>
-          {comps.length === 0 ? (
-            <p className="mt-2 text-sm text-mr-pale">
-              Select at least one comp below.
-            </p>
-          ) : null}
-        </div>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            {[
+              ["Conservative", range.low],
+              ["Suggested", range.mid],
+              ["Aggressive", range.high],
+            ].map(([label, v]) => (
+              <div
+                key={label as string}
+                className="rounded-xl border border-white/15 bg-white/5 p-3 text-center"
+              >
+                <p className="font-heading text-lg font-bold">
+                  {v ? money(v as number) : "—"}
+                </p>
+                <p className="text-[0.65rem] text-white/70">{label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
 
-      {/* Comps table */}
+      {/* Market summary by status */}
       <section className="mt-6 rounded-2xl border border-white/50 bg-white/60 p-6 shadow-sm backdrop-blur-xl backdrop-saturate-150">
         <h2 className="mb-4 font-heading text-lg font-bold text-mr-dark">
-          Comparable sales
+          Market summary
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-mr-base/10 text-xs uppercase tracking-wide text-body">
-                <th className="pb-2 pr-3 font-medium">Use</th>
-                <th className="pb-2 pr-3 font-medium">Address</th>
-                <th className="pb-2 pr-3 text-right font-medium">Sold</th>
-                <th className="pb-2 pr-3 text-right font-medium">Sqft</th>
-                <th className="pb-2 pr-3 text-right font-medium">$/sqft</th>
-                <th className="pb-2 text-right font-medium">Sold</th>
+                <th className="pb-2 pr-3 font-medium">Status</th>
+                <th className="pb-2 pr-3 text-right font-medium">Count</th>
+                <th className="pb-2 pr-3 text-right font-medium">Avg price</th>
+                <th className="pb-2 pr-3 text-right font-medium">Avg $/sqft</th>
+                <th className="pb-2 pr-3 text-right font-medium">Median</th>
+                <th className="pb-2 pr-3 text-right font-medium">Low</th>
+                <th className="pb-2 pr-3 text-right font-medium">High</th>
+                <th className="pb-2 text-right font-medium">Avg DOM</th>
               </tr>
             </thead>
             <tbody>
-              {CMA_COMPS.map((c) => {
-                const on = included.has(c.id);
-                return (
-                  <tr
-                    key={c.id}
-                    className={`border-b border-mr-base/5 last:border-0 ${
-                      on ? "" : "opacity-40"
-                    }`}
-                  >
-                    <td className="py-3 pr-3">
-                      <button
-                        type="button"
-                        onClick={() => toggle(c.id)}
-                        aria-label={on ? "Exclude comp" : "Include comp"}
-                        className={`flex h-5 w-5 items-center justify-center rounded border text-xs ${
-                          on
-                            ? "border-mr-base bg-mr-base text-white"
-                            : "border-mr-base/30 text-transparent"
-                        }`}
-                      >
-                        ✓
-                      </button>
-                    </td>
-                    <td className="py-3 pr-3">
-                      <span className="block font-medium text-mr-dark">
-                        {c.address}
-                      </span>
-                      <span className="block text-xs text-body">
-                        {c.beds} bd · {c.baths} ba · {c.distanceMi} mi
-                      </span>
-                    </td>
-                    <td className="py-3 pr-3 text-right font-medium text-mr-dark">
-                      {money(c.soldPrice)}
-                    </td>
-                    <td className="py-3 pr-3 text-right text-body">
-                      {c.sqft.toLocaleString()}
-                    </td>
-                    <td className="py-3 pr-3 text-right text-body">
-                      {money(c.soldPrice / c.sqft)}
-                    </td>
-                    <td className="py-3 text-right text-body">{c.soldAgo}</td>
-                  </tr>
-                );
-              })}
+              {summary.map((s) => (
+                <tr key={s.status} className="border-b border-mr-base/5 last:border-0">
+                  <td className="py-2 pr-3 font-medium text-mr-dark">{s.status}</td>
+                  <td className="py-2 pr-3 text-right text-body">{s.total}</td>
+                  <td className="py-2 pr-3 text-right text-mr-dark">{money(s.avgPrice)}</td>
+                  <td className="py-2 pr-3 text-right text-body">{money(Math.round(s.avgPpsf))}</td>
+                  <td className="py-2 pr-3 text-right text-body">{money(s.median)}</td>
+                  <td className="py-2 pr-3 text-right text-body">{money(s.low)}</td>
+                  <td className="py-2 pr-3 text-right text-body">{money(s.high)}</td>
+                  <td className="py-2 text-right text-body">{s.avgDom}</td>
+                </tr>
+              ))}
+              {summary.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-6 text-center text-sm text-body">
+                    Add comps to see the market summary.
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-xs text-body">
-          Suggested range is illustrative and not an appraisal or guarantee of
-          value.
-        </p>
       </section>
 
-      <BrandedPrintSheet
-        title="Comparative Market Analysis"
-        subtitle={`${CMA_SUBJECT.address}, ${CMA_SUBJECT.city}`}
-        inputs={printInputs}
-        rows={printRows}
-        disclaimer="Comparative market analysis is an estimate of value, not an appraisal or guarantee. Based on fabricated sample comparables."
-      />
+      {/* Comparables */}
+      <section className="mt-6 rounded-2xl border border-white/50 bg-white/60 p-6 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+        <h2 className="font-heading text-lg font-bold text-mr-dark">
+          Comparable listings
+        </h2>
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <input
+            value={compId}
+            onChange={(e) => setCompId(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addComp(compId)}
+            placeholder="Add a comp by MLS ID"
+            className="flex-1 rounded-xl border border-mr-base/15 bg-white px-4 py-2.5 text-sm text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
+          />
+          <button
+            type="button"
+            onClick={() => addComp(compId)}
+            className="rounded-full bg-mr-base px-6 py-2.5 text-sm font-semibold text-white hover:bg-mr-mid"
+          >
+            Add comp
+          </button>
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="text-xs text-body">Try:</span>
+          {SAMPLE_CMA_IDS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => addComp(id)}
+              className="rounded-full border border-mr-base/15 px-2.5 py-0.5 text-xs font-medium text-mr-base hover:bg-mr-pale/20"
+            >
+              {id}
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-body">
+          Mock MLS data for now. The live MLS API will plug in here later.
+        </p>
+
+        <div className="mt-4 flex flex-col gap-2">
+          {cma.comps.map((c) => (
+            <div
+              key={c.id}
+              className="flex items-center gap-3 rounded-xl border border-white/60 bg-white/70 p-3"
+            >
+              <Photo
+                src={c.photo}
+                alt={c.address}
+                className="h-14 w-20 flex-none rounded-lg object-cover"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-mr-dark">
+                  {c.address}
+                </p>
+                <p className="text-xs text-body">
+                  {c.beds} bd · {c.baths} ba · {c.sqft.toLocaleString()} sqft ·{" "}
+                  {money(Math.round(pricePerSqft(c)))}/sqft · {c.dom} DOM
+                </p>
+              </div>
+              <div className="flex-none text-right">
+                <span className="rounded-full bg-mr-pale/25 px-2 py-0.5 text-[0.65rem] font-semibold text-mr-base">
+                  {c.status}
+                </span>
+                <p className="mt-1 text-sm font-semibold text-mr-dark">
+                  {money(effectivePrice(c))}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => removeComp(c.id)}
+                aria-label="Remove"
+                className="flex h-7 w-7 flex-none items-center justify-center rounded-full border border-mr-base/15 text-mr-base hover:bg-mr-pale/20"
+              >
+                &times;
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <CmaPrint cma={cma} range={range} summary={summary} />
     </PageShell>
   );
 }
