@@ -2,6 +2,24 @@
 // Fabricated commission, goal, and leaderboard numbers. Not real Marshall
 // Reddick figures or people.
 
+// President's / Chairman's Club. Qualify by units OR volume. Thresholds are the
+// real 2026 criteria; the agent's current totals are fabricated sample data.
+export interface ClubTier {
+  name: string;
+  units: number;
+  volume: number;
+}
+
+export const CLUB_TIERS: ClubTier[] = [
+  { name: "President's Club", units: 26, volume: 14000000 },
+  { name: "Chairman's Club", units: 45, volume: 24000000 },
+];
+
+export const CLUB_PROGRESS = {
+  units: 14,
+  volume: 11960000,
+};
+
 export interface MonthVolume {
   month: string;
   volume: number; // in dollars

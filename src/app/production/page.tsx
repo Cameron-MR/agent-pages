@@ -7,6 +7,8 @@ import {
   GOALS,
   LEADERBOARD,
   MONTHLY_VOLUME,
+  CLUB_TIERS,
+  CLUB_PROGRESS,
 } from "@/lib/mock/production";
 
 // Production page: goal rings, a monthly volume chart, the commission ledger,
@@ -30,8 +32,11 @@ export default function ProductionPage() {
       title="Production"
       description="Your commissions, goals, and where you stand in the office. Sample numbers only."
     >
+      {/* President's / Chairman's Club */}
+      <ClubMeter />
+
       {/* Goal rings */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {GOALS.map((goal) => {
           const pct = Math.min(
             100,
@@ -249,5 +254,121 @@ function GoalRingSvg({ pct }: { pct: number }) {
         {pct}%
       </text>
     </svg>
+  );
+}
+
+// President's / Chairman's Club progress. Qualify by units OR volume, so each
+// metric gets its own thermometer with tier ticks, and the status reflects the
+// OR logic. Fabricated current totals.
+function ClubMeter() {
+  const pres = CLUB_TIERS[0];
+  const chair = CLUB_TIERS[1];
+  const { units, volume } = CLUB_PROGRESS;
+
+  const money = (n: number) =>
+    n >= 1000000 ? `$${(n / 1000000).toFixed(2)}M` : `$${(n / 1000).toFixed(0)}K`;
+
+  const qualifiesChair = units >= chair.units || volume >= chair.volume;
+  const qualifiesPres = units >= pres.units || volume >= pres.volume;
+
+  let status: string;
+  if (qualifiesChair) {
+    status = "Chairman's Club achieved. Congratulations.";
+  } else if (qualifiesPres) {
+    const u = Math.max(0, chair.units - units);
+    const v = Math.max(0, chair.volume - volume);
+    status = `President's Club achieved. ${u} units or ${money(v)} volume to Chairman's Club.`;
+  } else {
+    const u = Math.max(0, pres.units - units);
+    const v = Math.max(0, pres.volume - volume);
+    status = `${u} units or ${money(v)} volume to President's Club.`;
+  }
+
+  return (
+    <section className="rounded-2xl border border-mr-light/30 bg-gradient-to-br from-mr-base to-mr-dark p-6 text-white shadow-sm">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-mr-pale">
+            2026 Awards
+          </p>
+          <h2 className="mt-1 font-heading text-xl font-bold">
+            President&rsquo;s &amp; Chairman&rsquo;s Club
+          </h2>
+        </div>
+        <p className="text-sm text-white/85">{status}</p>
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <ClubBar
+          label="Units"
+          current={units}
+          currentLabel={`${units}`}
+          presThreshold={pres.units}
+          chairThreshold={chair.units}
+          presLabel={`${pres.units}`}
+          chairLabel={`${chair.units}`}
+        />
+        <ClubBar
+          label="Volume"
+          current={volume}
+          currentLabel={money(volume)}
+          presThreshold={pres.volume}
+          chairThreshold={chair.volume}
+          presLabel={money(pres.volume)}
+          chairLabel={money(chair.volume)}
+        />
+      </div>
+      <p className="mt-4 text-xs text-mr-pale">
+        Qualify for either club by hitting the units OR the volume threshold.
+      </p>
+    </section>
+  );
+}
+
+function ClubBar({
+  label,
+  current,
+  currentLabel,
+  presThreshold,
+  chairThreshold,
+  presLabel,
+  chairLabel,
+}: {
+  label: string;
+  current: number;
+  currentLabel: string;
+  presThreshold: number;
+  chairThreshold: number;
+  presLabel: string;
+  chairLabel: string;
+}) {
+  const fill = Math.min(100, Math.round((current / chairThreshold) * 100));
+  const presPct = Math.round((presThreshold / chairThreshold) * 100);
+  return (
+    <div className="rounded-2xl border border-white/15 bg-white/5 p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-wide text-mr-pale">
+          {label}
+        </span>
+        <span className="font-heading text-lg font-bold text-white">
+          {currentLabel}
+        </span>
+      </div>
+      <div className="relative mt-3 h-3 w-full rounded-full bg-white/15">
+        <div
+          className="h-3 rounded-full bg-gradient-to-r from-mr-light to-white"
+          style={{ width: `${fill}%` }}
+        />
+        {/* President's tier tick */}
+        <div
+          className="absolute top-[-3px] h-[18px] w-0.5 bg-white/70"
+          style={{ left: `${presPct}%` }}
+        />
+      </div>
+      <div className="mt-2 flex justify-between text-[0.65rem] text-white/70">
+        <span>President&rsquo;s {presLabel}</span>
+        <span>Chairman&rsquo;s {chairLabel}</span>
+      </div>
+    </div>
   );
 }

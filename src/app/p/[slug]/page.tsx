@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import Photo from "@/components/Photo";
+import Carousel from "@/components/Carousel";
 import { useAgentProfile } from "@/components/AgentProfileProvider";
 import { propertyPhoto } from "@/lib/mock/images";
 import {
@@ -340,6 +341,33 @@ function About() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Lifestyle gallery: swipe on mobile, arrows on web */}
+      <div className="mt-10">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-mr-base">
+          A little more about me
+        </p>
+        <Carousel ariaLabel="Lifestyle gallery">
+          {[
+            profile.aboutPhoto,
+            propertyPhoto(7, 700),
+            propertyPhoto(8, 700),
+            propertyPhoto(10, 700),
+            propertyPhoto(11, 700),
+          ].map((src, i) => (
+            <div
+              key={i}
+              className="h-48 w-72 flex-none snap-start overflow-hidden rounded-2xl border border-white/60 shadow-sm"
+            >
+              <Photo
+                src={src}
+                alt={`Lifestyle photo ${i + 1}`}
+                className="h-48 w-72 object-cover"
+              />
+            </div>
+          ))}
+        </Carousel>
       </div>
     </section>
   );

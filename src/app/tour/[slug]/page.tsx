@@ -5,7 +5,14 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import Photo from "@/components/Photo";
 import { useAgentProfile } from "@/components/AgentProfileProvider";
-import { DEFAULT_TOUR, loadTour, type Tour } from "@/lib/mock/tour";
+import {
+  DEFAULT_TOUR,
+  loadTour,
+  googleMapsEmbed,
+  zillowUrl,
+  appleMapsUrl,
+  type Tour,
+} from "@/lib/mock/tour";
 
 // Client-facing property tour page (the output of the Tour Builder). Branded
 // Marshall Reddick: top bar, hero with stats, a live route map with numbered
@@ -14,10 +21,27 @@ import { DEFAULT_TOUR, loadTour, type Tour } from "@/lib/mock/tour";
 export default function TourPage() {
   const { profile, initials } = useAgentProfile();
   const [tour, setTour] = useState<Tour>(DEFAULT_TOUR);
+  const [shared, setShared] = useState(false);
 
   useEffect(() => {
     setTour(loadTour());
   }, []);
+
+  const shareTour = async () => {
+    const url = window.location.href;
+    const text = `${tour.headline} — a home tour from ${profile.name}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: tour.headline, text, url });
+        return;
+      }
+      await navigator.clipboard?.writeText(url);
+    } catch {
+      // ignore (user cancelled share or clipboard blocked)
+    }
+    setShared(true);
+    setTimeout(() => setShared(false), 1800);
+  };
 
   const stops = tour.stops;
   const priceNums = stops
@@ -94,7 +118,16 @@ export default function TourPage() {
             </h2>
             <span className="text-xs text-body">{stops.length} stops</span>
           </div>
-          <TourMap count={stops.length} />
+          <div className="overflow-hidden rounded-2xl border border-white/60 shadow-sm">
+            <iframe
+              key={stops.map((s) => s.id).join("-")}
+              title="Tour route map"
+              src={googleMapsEmbed(stops)}
+              className="h-72 w-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
         </section>
 
         {/* Compare properties */}
@@ -133,10 +166,28 @@ export default function TourPage() {
                     {s.beds} bd · {s.baths} ba · {s.sqft} sqft
                   </p>
                   {s.showingTime ? (
-                    <p className="mt-2 rounded-full bg-mr-pale/25 px-2.5 py-0.5 text-xs font-semibold text-mr-base inline-block">
+                    <p className="mt-2 inline-block rounded-full bg-mr-pale/25 px-2.5 py-0.5 text-xs font-semibold text-mr-base">
                       {s.showingTime}
                     </p>
                   ) : null}
+                  <div className="mt-3 flex gap-2">
+                    <a
+                      href={zillowUrl(s)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 rounded-full bg-mr-base px-3 py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-mr-mid"
+                    >
+                      View on Zillow
+                    </a>
+                    <a
+                      href={appleMapsUrl(s)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 rounded-full border border-mr-base/20 bg-white px-3 py-2 text-center text-xs font-semibold text-mr-base transition-colors hover:bg-mr-pale/20"
+                    >
+                      Navigate
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}
@@ -165,6 +216,24 @@ export default function TourPage() {
                     {s.city} · {s.beds} bd / {s.baths} ba / {s.sqft} sqft
                     {s.notes ? ` · ${s.notes}` : ""}
                   </p>
+                  <div className="mt-1 flex gap-3 text-xs">
+                    <a
+                      href={zillowUrl(s)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-mr-base hover:text-mr-mid"
+                    >
+                      View on Zillow
+                    </a>
+                    <a
+                      href={appleMapsUrl(s)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-mr-base hover:text-mr-mid"
+                    >
+                      Navigate
+                    </a>
+                  </div>
                 </div>
                 <div className="flex-none text-right">
                   <p className="font-heading text-sm font-bold text-mr-base">
@@ -219,9 +288,10 @@ export default function TourPage() {
           </div>
           <button
             type="button"
+            onClick={shareTour}
             className="mt-3 w-full rounded-full bg-white py-3 text-sm font-semibold text-mr-dark transition-transform hover:-translate-y-0.5"
           >
-            Text this tour to a client
+            {shared ? "Link copied" : "Text this tour to a client"}
           </button>
         </section>
 
@@ -253,64 +323,5 @@ export default function TourPage() {
         </Link>
       </div>
     </main>
-  );
-}
-
-// Stylized route map with numbered pins connected by a dashed path. Pure SVG so
-// there is no map dependency or API key. A real map can replace this later.
-function TourMap({ count }: { count: number }) {
-  const n = Math.max(count, 1);
-  // Spread pins across a gentle S-curve.
-  const pts = Array.from({ length: n }, (_, i) => {
-    const t = n === 1 ? 0.5 : i / (n - 1);
-    const x = 60 + t * 600;
-    const y = 150 + Math.sin(t * Math.PI * 1.5) * 70;
-    return [x, y] as const;
-  });
-  const path = pts.map(([x, y]) => `${x},${y}`).join(" ");
-
-  return (
-    <div className="overflow-hidden rounded-2xl border border-white/60 shadow-sm">
-      <svg viewBox="0 0 720 300" className="h-64 w-full">
-        <rect width="720" height="300" fill="#8BB8C4" fillOpacity="0.18" />
-        <path
-          d="M0 300 L0 210 Q180 185 360 235 T720 215 L720 300 Z"
-          fill="#50AAC4"
-          fillOpacity="0.3"
-        />
-        <g stroke="#316878" strokeOpacity="0.2" strokeWidth="3" fill="none">
-          <path d="M40 60 L680 80" />
-          <path d="M120 10 L260 290" />
-          <path d="M560 10 L470 290" />
-          <path d="M0 150 L720 170" />
-        </g>
-        {/* route */}
-        <polyline
-          points={path}
-          fill="none"
-          stroke="#316878"
-          strokeWidth="3"
-          strokeDasharray="2 8"
-          strokeLinecap="round"
-        />
-        {pts.map(([x, y], i) => (
-          <g key={i}>
-            <circle cx={x} cy={y} r="15" fill="#15263F" opacity="0" />
-            <circle cx={x} cy={y} r="14" fill="#1C3C45" />
-            <text
-              x={x}
-              y={y}
-              textAnchor="middle"
-              dominantBaseline="central"
-              fill="#fff"
-              fontSize="13"
-              fontWeight="700"
-            >
-              {i + 1}
-            </text>
-          </g>
-        ))}
-      </svg>
-    </div>
   );
 }

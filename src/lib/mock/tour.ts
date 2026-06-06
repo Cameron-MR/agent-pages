@@ -208,3 +208,43 @@ export function saveTour(tour: Tour) {
     // ignore
   }
 }
+
+// ---------------------------------------------------------------------------
+// Deep links. These use real, keyless endpoints so the demo works without API
+// keys. For production, a Google Maps Embed API key gives a richer map.
+// ---------------------------------------------------------------------------
+
+function fullAddress(s: { address: string; city: string }): string {
+  return `${s.address}, ${s.city}`;
+}
+
+// Real Zillow address search page for a property.
+export function zillowUrl(s: { address: string; city: string }): string {
+  const slug = `${s.address} ${s.city}`
+    .replace(/,/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+  return `https://www.zillow.com/homes/${encodeURIComponent(slug)}_rb/`;
+}
+
+// Apple Maps navigation to the property (opens Maps on Apple devices).
+export function appleMapsUrl(s: { address: string; city: string }): string {
+  return `https://maps.apple.com/?daddr=${encodeURIComponent(fullAddress(s))}&dirflg=d`;
+}
+
+// A keyless Google Maps embed. With multiple stops it draws the driving route
+// through every stop; with one stop it centers on it.
+export function googleMapsEmbed(stops: { address: string; city: string }[]): string {
+  if (stops.length === 0) {
+    return "https://maps.google.com/maps?q=Orange%20County%20CA&z=10&output=embed";
+  }
+  if (stops.length === 1) {
+    return `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress(stops[0]))}&z=13&output=embed`;
+  }
+  const saddr = encodeURIComponent(fullAddress(stops[0]));
+  const daddr = stops
+    .slice(1)
+    .map((s, i) => (i === 0 ? "" : "+to:") + encodeURIComponent(fullAddress(s)))
+    .join("");
+  return `https://maps.google.com/maps?saddr=${saddr}&daddr=${daddr}&output=embed`;
+}
