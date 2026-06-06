@@ -50,7 +50,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-surface-light text-body">
+    <main className="relative min-h-screen overflow-hidden bg-surface-light pb-16 text-body md:pb-0">
       <div
         aria-hidden
         className="pointer-events-none absolute -left-40 -top-40 h-[30rem] w-[30rem] rounded-full bg-mr-light/15 blur-[130px]"

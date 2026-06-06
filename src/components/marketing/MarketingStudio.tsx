@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SocialGraphic from "@/components/marketing/SocialGraphic";
 import FlyerPrint from "@/components/marketing/FlyerPrint";
 import { downloadSocialPng } from "@/lib/socialCanvas";
@@ -17,6 +17,37 @@ import {
   type CampaignId,
 } from "@/lib/mock/marketing";
 
+// Scheduled posts persist per device. The live version would hand these to a
+// social publishing API; the queue below is the exact payload shape to send.
+interface ScheduledPost {
+  id: string;
+  listingAddress: string;
+  campaign: CampaignId;
+  channels: string[];
+  when: string;
+}
+
+const SCHEDULE_KEY = "mr-scheduled-posts";
+const CHANNELS = ["Instagram", "Facebook", "LinkedIn"] as const;
+
+function loadScheduled(): ScheduledPost[] {
+  try {
+    const raw = window.localStorage.getItem(SCHEDULE_KEY);
+    const parsed = raw ? (JSON.parse(raw) as ScheduledPost[]) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistScheduled(posts: ScheduledPost[]) {
+  try {
+    window.localStorage.setItem(SCHEDULE_KEY, JSON.stringify(posts));
+  } catch {
+    // ignore
+  }
+}
+
 // The interactive Marketing Studio. Pick a listing and a campaign, and every
 // asset updates live: branded social graphics (feed + story), a ready-to-paste
 // caption, a printable flyer, and email templates. Everything is personalized
@@ -28,6 +59,41 @@ export default function MarketingStudio() {
   const [emailId, setEmailId] = useState(EMAIL_TEMPLATES[0].id);
   const [copied, setCopied] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [scheduled, setScheduled] = useState<ScheduledPost[]>([]);
+  const [schedWhen, setSchedWhen] = useState("");
+  const [schedChannels, setSchedChannels] = useState<string[]>(["Instagram"]);
+
+  useEffect(() => {
+    setScheduled(loadScheduled());
+  }, []);
+
+  const toggleChannel = (c: string) =>
+    setSchedChannels((prev) =>
+      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
+    );
+
+  const schedulePost = () => {
+    if (!schedWhen || schedChannels.length === 0) return;
+    const next = [
+      {
+        id: "sp" + Date.now(),
+        listingAddress: listing.address,
+        campaign,
+        channels: [...schedChannels],
+        when: schedWhen,
+      },
+      ...scheduled,
+    ];
+    setScheduled(next);
+    persistScheduled(next);
+    setSchedWhen("");
+  };
+
+  const removeScheduled = (id: string) => {
+    const next = scheduled.filter((p) => p.id !== id);
+    setScheduled(next);
+    persistScheduled(next);
+  };
 
   const download = async (format: "square" | "story") => {
     setDownloading(format);
@@ -175,6 +241,84 @@ export default function MarketingStudio() {
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">
             {caption}
           </p>
+        </div>
+
+        {/* Schedule this post (demo queue; live version posts to a publishing API) */}
+        <div className="mt-5 rounded-2xl border border-white/50 bg-white/60 p-5 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+          <p className="text-sm font-semibold text-mr-dark">Schedule this post</p>
+          <p className="mt-0.5 text-xs text-body">
+            Queues the current graphic and caption. Demo queue saved on this
+            device; the live version hands it to the publishing tool.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {CHANNELS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => toggleChannel(c)}
+                className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
+                  schedChannels.includes(c)
+                    ? "bg-mr-base text-white shadow-sm"
+                    : "border border-mr-base/15 bg-white/70 text-body hover:text-mr-base"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+            <input
+              type="datetime-local"
+              value={schedWhen}
+              onChange={(e) => setSchedWhen(e.target.value)}
+              className="rounded-xl border border-mr-base/15 bg-white px-3 py-2 text-xs text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
+            />
+            <button
+              type="button"
+              onClick={schedulePost}
+              disabled={!schedWhen || schedChannels.length === 0}
+              className={`rounded-full px-5 py-2 text-xs font-semibold transition-colors ${
+                !schedWhen || schedChannels.length === 0
+                  ? "cursor-default bg-mr-pale/30 text-mr-base/60"
+                  : "bg-mr-base text-white hover:bg-mr-mid"
+              }`}
+            >
+              Schedule
+            </button>
+          </div>
+
+          {scheduled.length ? (
+            <div className="mt-4 flex flex-col gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-mr-base">
+                Queued posts
+              </p>
+              {scheduled.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-white/60 bg-white/70 px-4 py-2.5"
+                >
+                  <p className="min-w-0 truncate text-xs text-body">
+                    <span className="font-semibold text-mr-dark">
+                      {p.listingAddress}
+                    </span>{" "}
+                    · {p.campaign} · {p.channels.join(", ")} ·{" "}
+                    {new Date(p.when).toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => removeScheduled(p.id)}
+                    aria-label="Remove scheduled post"
+                    className="flex-none rounded-full border border-mr-base/10 px-2.5 py-1 text-xs text-body transition-colors hover:text-mr-dark"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
 

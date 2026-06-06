@@ -31,7 +31,7 @@ export default function PageShell({
   const [stub, setStub] = useState<StubContent | null>(null);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-surface-light text-body">
+    <main className="relative min-h-screen overflow-hidden bg-surface-light pb-16 text-body md:pb-0">
       {/* Ambient teal washes so the glass has light to refract. */}
       <div
         aria-hidden

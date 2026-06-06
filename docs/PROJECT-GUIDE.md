@@ -151,6 +151,7 @@ reuse it. Faked logic is expected; the value is the UI/UX and the data shapes.
 | `mr-today-done` | TodayPanel | Checked-off Today task labels |
 | `mr-openhouse-leads` | openHouse | Kiosk sign-in leads (per device, demo) |
 | `mr-production-goals` | production | Custom goal targets for the rings |
+| `mr-scheduled-posts` | MarketingStudio | Queued social posts (demo) |
 
 Pattern: a `load*()` returns defaults when storage is empty/invalid and repairs
 shape; a `save*()` writes JSON; builder pages write, client pages read on mount.
@@ -215,6 +216,15 @@ shape; a `save*()` writes JSON; builder pages write, client pages read on mount.
 
 Newest first. Add an entry each working session.
 
+- **Mobile tab bar + post scheduling.**
+  - App-style bottom tab bar on phones (`MobileTabBar.tsx`, mounted in
+    Providers): Home, Pipeline, Listings, Marketing, CMA. Hidden at md+, on
+    print, and on client-facing pages (/p, /tour, live /cma). PageShell and
+    the home page add bottom padding on mobile so content clears it.
+  - Marketing Studio "Schedule this post": channel chips
+    (Instagram/Facebook/LinkedIn) + datetime, queued to `mr-scheduled-posts`
+    with a removable Queued posts list. The queue entry is the payload shape
+    for a future publishing API.
 - **Open House toolkit + editable goals.**
   - New `/open-house`: pick a listing, launch a full-screen client-facing
     kiosk sign-in (name, phone/email, source chips, agent question, note).
