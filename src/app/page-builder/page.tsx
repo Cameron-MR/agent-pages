@@ -18,6 +18,19 @@ import {
   type ModuleId,
   type PageConfig,
 } from "@/lib/mock/pageBuilder";
+import {
+  loadContent,
+  saveContent,
+  defaultContent,
+  type PageContent,
+} from "@/lib/mock/pageContent";
+import {
+  propertyPhoto,
+} from "@/lib/mock/images";
+import type {
+  EducationItem,
+  PreferredVendor,
+} from "@/lib/mock/publicPage";
 
 // Client Page Builder. The agent picks an audience, toggles modules on or off,
 // and watches a live phone-style preview update. Publishing is a placeholder.
@@ -179,6 +192,8 @@ export default function PageBuilderPage() {
           </div>
         </div>
       </div>
+
+      <ContentEditor />
     </PageShell>
   );
 }
@@ -405,6 +420,195 @@ function PreviewBlock({
         {title}
       </p>
       {children}
+    </div>
+  );
+}
+
+// Curate the content for the Education and Preferred Vendors modules. Edits
+// save immediately and the public page renders them.
+function ContentEditor() {
+  const [content, setContent] = useState<PageContent>(defaultContent);
+
+  useEffect(() => {
+    setContent(loadContent());
+  }, []);
+
+  const persist = (next: PageContent) => {
+    setContent(next);
+    saveContent(next);
+  };
+
+  const updateEd = (id: string, patch: Partial<EducationItem>) =>
+    persist({
+      ...content,
+      education: content.education.map((e) =>
+        e.id === id ? { ...e, ...patch } : e
+      ),
+    });
+  const removeEd = (id: string) =>
+    persist({ ...content, education: content.education.filter((e) => e.id !== id) });
+  const addEd = () =>
+    persist({
+      ...content,
+      education: [
+        ...content.education,
+        {
+          id: "ed" + Date.now(),
+          title: "New educational item",
+          type: "Article",
+          date: new Date().toLocaleDateString("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+          }),
+          length: "3 min read",
+          photo: propertyPhoto(content.education.length + 6, 600),
+        },
+      ],
+    });
+
+  const updateVn = (id: string, patch: Partial<PreferredVendor>) =>
+    persist({
+      ...content,
+      vendors: content.vendors.map((v) =>
+        v.id === id ? { ...v, ...patch } : v
+      ),
+    });
+  const removeVn = (id: string) =>
+    persist({ ...content, vendors: content.vendors.filter((v) => v.id !== id) });
+  const addVn = () =>
+    persist({
+      ...content,
+      vendors: [
+        ...content.vendors,
+        { id: "vn" + Date.now(), type: "Lender", name: "New vendor", blurb: "" },
+      ],
+    });
+
+  const inputCls =
+    "w-full rounded-lg border border-mr-base/15 bg-white px-3 py-2 text-sm text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40";
+
+  return (
+    <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* Education */}
+      <section className="rounded-2xl border border-white/50 bg-white/60 p-5 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="font-heading text-base font-bold text-mr-dark">
+              Education content
+            </h2>
+            <p className="text-xs text-body">
+              Curate the videos and articles on your page.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addEd}
+            className="rounded-full border border-mr-base/20 bg-white/70 px-3 py-1.5 text-xs font-semibold text-mr-base hover:bg-white"
+          >
+            Add item
+          </button>
+        </div>
+        <div className="flex flex-col gap-3">
+          {content.education.map((e) => (
+            <div key={e.id} className="rounded-xl border border-white/60 bg-white/60 p-3">
+              <input
+                value={e.title}
+                onChange={(ev) => updateEd(e.id, { title: ev.target.value })}
+                className={inputCls}
+                placeholder="Title"
+              />
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                <select
+                  value={e.type}
+                  onChange={(ev) =>
+                    updateEd(e.id, {
+                      type: ev.target.value as EducationItem["type"],
+                    })
+                  }
+                  className={inputCls}
+                >
+                  <option value="Video">Video</option>
+                  <option value="Article">Article</option>
+                </select>
+                <input
+                  value={e.date}
+                  onChange={(ev) => updateEd(e.id, { date: ev.target.value })}
+                  className={inputCls}
+                  placeholder="Date"
+                />
+                <input
+                  value={e.length}
+                  onChange={(ev) => updateEd(e.id, { length: ev.target.value })}
+                  className={inputCls}
+                  placeholder="Length"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => removeEd(e.id)}
+                className="mt-2 text-xs font-medium text-mr-base hover:text-mr-mid"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Vendors */}
+      <section className="rounded-2xl border border-white/50 bg-white/60 p-5 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="font-heading text-base font-bold text-mr-dark">
+              Preferred vendors
+            </h2>
+            <p className="text-xs text-body">
+              Your recommended lender, title, escrow, and insurance.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addVn}
+            className="rounded-full border border-mr-base/20 bg-white/70 px-3 py-1.5 text-xs font-semibold text-mr-base hover:bg-white"
+          >
+            Add vendor
+          </button>
+        </div>
+        <div className="flex flex-col gap-3">
+          {content.vendors.map((v) => (
+            <div key={v.id} className="rounded-xl border border-white/60 bg-white/60 p-3">
+              <div className="grid grid-cols-3 gap-2">
+                <input
+                  value={v.type}
+                  onChange={(ev) => updateVn(v.id, { type: ev.target.value })}
+                  className={inputCls}
+                  placeholder="Type"
+                />
+                <input
+                  value={v.name}
+                  onChange={(ev) => updateVn(v.id, { name: ev.target.value })}
+                  className={`${inputCls} col-span-2`}
+                  placeholder="Vendor name"
+                />
+              </div>
+              <input
+                value={v.blurb}
+                onChange={(ev) => updateVn(v.id, { blurb: ev.target.value })}
+                className={`${inputCls} mt-2`}
+                placeholder="Short description"
+              />
+              <button
+                type="button"
+                onClick={() => removeVn(v.id)}
+                className="mt-2 text-xs font-medium text-mr-base hover:text-mr-mid"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

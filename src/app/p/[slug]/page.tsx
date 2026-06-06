@@ -13,6 +13,11 @@ import {
   type ModuleId,
 } from "@/lib/mock/pageBuilder";
 import {
+  loadContent,
+  defaultContent,
+  type PageContent,
+} from "@/lib/mock/pageContent";
+import {
   PUBLIC_AGENT,
   PUBLIC_LISTINGS,
   RECENT_SALES,
@@ -20,9 +25,9 @@ import {
   REVIEW_SOURCES,
   CLIENT_REVIEWS,
   COMPANY_EVENTS,
-  EDUCATION_ITEMS,
-  PREFERRED_VENDORS,
   AGENT_SERVICES,
+  type EducationItem,
+  type PreferredVendor,
 } from "@/lib/mock/publicPage";
 
 // The public, client-facing page an agent shares (Surface 2). It renders the
@@ -31,12 +36,14 @@ import {
 export default function PublicPage() {
   const { profile } = useAgentProfile();
   const [enabled, setEnabled] = useState<ModuleId[]>(MODULE_ORDER);
+  const [content, setContent] = useState<PageContent>(defaultContent);
   const [sentContact, setSentContact] = useState(false);
   const [sentValuation, setSentValuation] = useState(false);
 
-  // Read the builder config (Public audience) after mount.
+  // Read the builder config (Public audience) and curated content after mount.
   useEffect(() => {
     setEnabled(loadConfig().Public);
+    setContent(loadContent());
   }, []);
 
   const has = (id: ModuleId) => enabled.includes(id);
@@ -84,11 +91,11 @@ export default function PublicPage() {
           case "services":
             return <Services key={id} />;
           case "vendors":
-            return <Vendors key={id} />;
+            return <Vendors key={id} vendors={content.vendors} />;
           case "events":
             return <Events key={id} />;
           case "education":
-            return <Education key={id} />;
+            return <Education key={id} items={content.education} />;
           case "contact":
             return (
               <Contact
@@ -500,12 +507,13 @@ function Services() {
   );
 }
 
-function Vendors() {
+function Vendors({ vendors }: { vendors: PreferredVendor[] }) {
+  if (vendors.length === 0) return null;
   return (
     <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <SectionHead eyebrow="Trusted partners" title="Preferred vendors" />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {PREFERRED_VENDORS.map((v) => (
+        {vendors.map((v) => (
           <div
             key={v.id}
             className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur"
@@ -567,13 +575,14 @@ function Events() {
   );
 }
 
-function Education() {
+function Education({ items }: { items: EducationItem[] }) {
   const { profile } = useAgentProfile();
+  if (items.length === 0) return null;
   return (
     <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <SectionHead eyebrow="Education" title="Tips and market insights" />
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-        {EDUCATION_ITEMS.map((item) => (
+        {items.map((item) => (
           <div
             key={item.id}
             className="group overflow-hidden rounded-2xl border border-white/60 bg-white/70 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md"
