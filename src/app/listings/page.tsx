@@ -214,7 +214,17 @@ export default function ListingsPage() {
         ))}
       </div>
 
-      <ListingDrawer listing={open} onClose={() => setOpen(null)} />
+      <ListingDrawer
+        listing={open}
+        onClose={() => setOpen(null)}
+        onUpdate={(patch) => {
+          if (!open) return;
+          setItems((prev) =>
+            prev.map((l) => (l.id === open.id ? { ...l, ...patch } : l))
+          );
+          setOpen((prev) => (prev ? { ...prev, ...patch } : prev));
+        }}
+      />
     </PageShell>
   );
 }
@@ -222,9 +232,11 @@ export default function ListingsPage() {
 function ListingDrawer({
   listing,
   onClose,
+  onUpdate,
 }: {
   listing: Listing | null;
   onClose: () => void;
+  onUpdate: (patch: Partial<Listing>) => void;
 }) {
   if (!listing) return null;
   return (
@@ -275,6 +287,48 @@ function ListingDrawer({
           <p className="mt-4 text-sm leading-relaxed text-body">
             {listing.blurb}
           </p>
+
+          {/* Quick actions: status + price change (mock; would sync to MLS) */}
+          <div className="mt-5 rounded-2xl border border-mr-base/10 bg-white/70 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-mr-base">
+              Quick actions
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {(Object.keys(STATUS_STYLES) as ListingStatus[]).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => onUpdate({ status: s })}
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                    listing.status === s
+                      ? "bg-mr-base text-white shadow-sm"
+                      : "border border-mr-base/15 bg-white/70 text-body hover:text-mr-base"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 flex items-center gap-2">
+              <input
+                type="text"
+                defaultValue={listing.price}
+                key={listing.id}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    onUpdate({ price: (e.target as HTMLInputElement).value });
+                  }
+                }}
+                onBlur={(e) => onUpdate({ price: e.target.value })}
+                aria-label="List price"
+                className="w-36 rounded-xl border border-mr-base/15 bg-white px-3 py-2 text-sm font-semibold text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
+              />
+              <span className="text-xs text-body">
+                Edit the list price, Enter to apply. Demo only; the live
+                version syncs status and price to the MLS.
+              </span>
+            </div>
+          </div>
 
           <div className="mt-5 grid grid-cols-3 gap-3">
             {[

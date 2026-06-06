@@ -225,6 +225,8 @@ Newest first. Add an entry each working session.
     (Instagram/Facebook/LinkedIn) + datetime, queued to `mr-scheduled-posts`
     with a removable Queued posts list. The queue entry is the payload shape
     for a future publishing API.
+  - Listing drawer Quick actions: one-tap status change and inline list
+    price edit (updates the card and drawer; would sync to the MLS live).
 - **Open House toolkit + editable goals.**
   - New `/open-house`: pick a listing, launch a full-screen client-facing
     kiosk sign-in (name, phone/email, source chips, agent question, note).
