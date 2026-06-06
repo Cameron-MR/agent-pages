@@ -71,7 +71,9 @@ export default function TourBuilderPage() {
 
   const preview = () => {
     saveTour(tour);
-    router.push("/tour/jordan-sample");
+    // ?view=agent unlocks agent-only controls on the tour page (the share
+    // button). The link clients receive is the bare URL without it.
+    router.push("/tour/jordan-sample?view=agent");
   };
 
   return (

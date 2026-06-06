@@ -22,13 +22,21 @@ export default function TourPage() {
   const { profile, initials } = useAgentProfile();
   const [tour, setTour] = useState<Tour>(DEFAULT_TOUR);
   const [shared, setShared] = useState(false);
+  // Agent view: the Tour Builder opens this page with ?view=agent, which
+  // reveals agent-only controls (the share button). The link a client gets
+  // has no param, so clients never see them.
+  const [isAgentView, setIsAgentView] = useState(false);
 
   useEffect(() => {
     setTour(loadTour());
+    setIsAgentView(
+      new URLSearchParams(window.location.search).get("view") === "agent"
+    );
   }, []);
 
   const shareTour = async () => {
-    const url = window.location.href;
+    // Share the clean client URL (no ?view=agent).
+    const url = `${window.location.origin}${window.location.pathname}`;
     const text = `${tour.headline} — a home tour from ${profile.name}`;
     try {
       if (navigator.share) {
@@ -286,13 +294,15 @@ export default function TourPage() {
               Text
             </a>
           </div>
-          <button
-            type="button"
-            onClick={shareTour}
-            className="mt-3 w-full rounded-full bg-white py-3 text-sm font-semibold text-mr-dark transition-transform hover:-translate-y-0.5"
-          >
-            {shared ? "Link copied" : "Text this tour to a client"}
-          </button>
+          {isAgentView ? (
+            <button
+              type="button"
+              onClick={shareTour}
+              className="mt-3 w-full rounded-full bg-white py-3 text-sm font-semibold text-mr-dark transition-transform hover:-translate-y-0.5"
+            >
+              {shared ? "Link copied" : "Text this tour to a client"}
+            </button>
+          ) : null}
         </section>
 
         <footer className="mt-10 text-center">

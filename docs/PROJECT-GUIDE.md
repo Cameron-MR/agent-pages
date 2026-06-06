@@ -115,7 +115,9 @@ reuse it. Faked logic is expected; the value is the UI/UX and the data shapes.
   vendors, upcoming events, education, contact.
 - **`/tour/[slug]`** — client tour page: hero + stats, Google Maps route, swipe
   Compare cards, All homes list, agent card; each home links to Zillow and
-  Apple Maps; share link.
+  Apple Maps. The "Text this tour to a client" share button is agent-only:
+  the builder opens the page with `?view=agent` to reveal it, and the bare
+  client link never shows it.
 - **`/cma/[slug]`** — client CMA page: subject hero with suggested price range,
   market summary, comparable cards (Zillow + Apple Maps), Google map of subject
   + comps, agent card, share link.
@@ -198,6 +200,9 @@ shape; a `save*()` writes JSON; builder pages write, client pages read on mount.
 
 Newest first. Add an entry each working session.
 
+- **Agent-only tour share button.** The client tour page hides "Text this
+  tour to a client" from clients. The Tour Builder opens the page with
+  `?view=agent`, the only view that shows it.
 - **CMA overhaul + this guide.** CMA now MLS-ID driven with rich comp records,
   live suggested range + market summary; new live client CMA page
   (`/cma/[slug]`) and a redesigned multi-section branded CMA report
