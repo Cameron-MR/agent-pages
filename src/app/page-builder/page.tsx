@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import Photo from "@/components/Photo";
@@ -10,43 +10,47 @@ import {
   AUDIENCES,
   AUDIENCE_HEADLINES,
   BUILDER_MODULES,
+  MODULE_ORDER,
+  defaultConfig,
+  loadConfig,
+  saveConfig,
   type Audience,
+  type ModuleId,
+  type PageConfig,
 } from "@/lib/mock/pageBuilder";
 
 // Client Page Builder. The agent picks an audience, toggles modules on or off,
 // and watches a live phone-style preview update. Publishing is a placeholder.
 // One agent, many configurations: each audience keeps its own module set.
 export default function PageBuilderPage() {
-  const [audience, setAudience] = useState<Audience>("Buyer");
-
-  // Module on/off state keyed by audience, seeded from the defaults.
-  const [config, setConfig] = useState<Record<Audience, Set<string>>>(() => {
-    const initial = {} as Record<Audience, Set<string>>;
-    AUDIENCES.forEach((aud) => {
-      initial[aud] = new Set(
-        BUILDER_MODULES.filter((m) => m.defaultOn.includes(aud)).map((m) => m.id)
-      );
-    });
-    return initial;
-  });
-
+  const [audience, setAudience] = useState<Audience>("Public");
+  const [config, setConfig] = useState<PageConfig>(defaultConfig);
   const [published, setPublished] = useState(false);
 
-  const activeSet = config[audience];
+  // Load the saved config after mount so the builder matches the live page.
+  useEffect(() => {
+    setConfig(loadConfig());
+  }, []);
 
-  const toggle = (id: string) => {
+  const activeIds = config[audience];
+  const has = (id: ModuleId) => activeIds.includes(id);
+
+  const toggle = (id: ModuleId) => {
     setConfig((prev) => {
-      const next = new Set(prev[audience]);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return { ...prev, [audience]: next };
+      const on = prev[audience].includes(id);
+      const nextIds = on
+        ? prev[audience].filter((m) => m !== id)
+        : MODULE_ORDER.filter((m) => m === id || prev[audience].includes(m));
+      const next = { ...prev, [audience]: nextIds };
+      saveConfig(next);
+      return next;
     });
     setPublished(false);
   };
 
   const enabledModules = useMemo(
-    () => BUILDER_MODULES.filter((m) => activeSet.has(m.id)),
-    [activeSet]
+    () => BUILDER_MODULES.filter((m) => activeIds.includes(m.id)),
+    [activeIds]
   );
 
   return (
@@ -97,7 +101,7 @@ export default function PageBuilderPage() {
             </div>
             <div className="flex flex-col gap-2">
               {BUILDER_MODULES.map((m) => {
-                const on = activeSet.has(m.id);
+                const on = has(m.id);
                 return (
                   <button
                     key={m.id}
@@ -171,7 +175,7 @@ export default function PageBuilderPage() {
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-mr-light">
               Live preview
             </p>
-            <PhonePreview audience={audience} enabledIds={activeSet} />
+            <PhonePreview audience={audience} enabledIds={activeIds} />
           </div>
         </div>
       </div>
@@ -184,9 +188,9 @@ function PhonePreview({
   enabledIds,
 }: {
   audience: Audience;
-  enabledIds: Set<string>;
+  enabledIds: ModuleId[];
 }) {
-  const has = (id: string) => enabledIds.has(id);
+  const has = (id: ModuleId) => enabledIds.includes(id);
   const { profile, initials } = useAgentProfile();
   const featured = LISTINGS.filter((l) => l.status !== "Sold").slice(0, 2);
 
@@ -247,22 +251,6 @@ function PhonePreview({
             </PreviewBlock>
           ) : null}
 
-          {has("search") ? (
-            <PreviewBlock title="Search homes">
-              <div className="rounded-lg border border-mr-base/15 bg-white p-2 text-xs text-body">
-                City, zip, or MLS #
-              </div>
-            </PreviewBlock>
-          ) : null}
-
-          {has("rental") ? (
-            <PreviewBlock title="Property management" tint>
-              <p className="text-xs text-body">
-                Full-service management for your rental, handled end to end.
-              </p>
-            </PreviewBlock>
-          ) : null}
-
           {has("featured") ? (
             <div>
               <p className="mb-1.5 font-heading text-xs font-bold text-mr-dark">
@@ -311,30 +299,81 @@ function PhonePreview({
             </div>
           ) : null}
 
-          {has("testimonials") ? (
-            <PreviewBlock title="What clients say" tint>
-              <p className="text-[0.6rem] text-mr-light">★★★★★</p>
+          {has("recentSales") ? (
+            <PreviewBlock title="Recently sold">
+              <div className="flex gap-2">
+                {LISTINGS.filter((l) => l.status === "Sold")
+                  .concat(featured)
+                  .slice(0, 2)
+                  .map((l) => (
+                    <div
+                      key={l.id}
+                      className="flex-1 overflow-hidden rounded-lg border border-white/60 bg-white"
+                    >
+                      <Photo
+                        src={l.photo}
+                        alt={l.address}
+                        className="h-12 w-full object-cover"
+                      />
+                      <p className="px-1.5 py-1 text-[0.6rem] font-semibold text-mr-base">
+                        {l.price}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </PreviewBlock>
+          ) : null}
+
+          {has("reviews") ? (
+            <PreviewBlock title="Reviews" tint>
+              <p className="text-[0.6rem] text-mr-light">★★★★★ Zillow · Google · Yelp</p>
               <p className="text-xs italic text-body">
                 &ldquo;Made the whole thing easy.&rdquo;
               </p>
             </PreviewBlock>
           ) : null}
 
-          {has("resources") ? (
-            <PreviewBlock title="Free guides">
-              <p className="text-xs text-body">Buyer and seller playbooks.</p>
+          {has("services") ? (
+            <PreviewBlock title="More ways I can help">
+              <p className="text-xs text-body">
+                Property management and private lending.
+              </p>
+            </PreviewBlock>
+          ) : null}
+
+          {has("vendors") ? (
+            <PreviewBlock title="Preferred vendors" tint>
+              <p className="text-xs text-body">
+                Lender, title, escrow, and insurance.
+              </p>
+            </PreviewBlock>
+          ) : null}
+
+          {has("events") ? (
+            <PreviewBlock title="Upcoming events">
+              <p className="text-xs text-body">
+                Company webinars and investor events.
+              </p>
+            </PreviewBlock>
+          ) : null}
+
+          {has("education") ? (
+            <PreviewBlock title="Education" tint>
+              <p className="text-xs text-body">
+                Videos and articles from {profile.name.split(" ")[0]}.
+              </p>
             </PreviewBlock>
           ) : null}
 
           {has("contact") ? (
-            <PreviewBlock title="Get in touch" tint>
+            <PreviewBlock title="Get in touch">
               <div className="rounded-lg bg-mr-base py-1.5 text-center text-xs font-semibold text-white">
                 Contact {profile.name.split(" ")[0]}
               </div>
             </PreviewBlock>
           ) : null}
 
-          {enabledIds.size === 0 ? (
+          {enabledIds.length === 0 ? (
             <p className="py-12 text-center text-xs text-body">
               No modules on. Toggle some to build the page.
             </p>
