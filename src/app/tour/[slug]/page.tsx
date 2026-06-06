@@ -5,10 +5,12 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import Photo from "@/components/Photo";
 import { useAgentProfile } from "@/components/AgentProfileProvider";
+import { downloadVcard } from "@/lib/vcard";
 import {
   DEFAULT_TOUR,
   loadTour,
   googleMapsEmbed,
+  googleDirectionsUrl,
   zillowUrl,
   appleMapsUrl,
   type Tour,
@@ -303,6 +305,14 @@ export default function TourPage() {
               {shared ? "Link copied" : "Text this tour to a client"}
             </button>
           ) : null}
+          {/* Real .vcf download, available to any viewer */}
+          <button
+            type="button"
+            onClick={() => downloadVcard(profile)}
+            className="mt-2 w-full rounded-full border border-white/30 bg-white/10 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+          >
+            Save {profile.name.split(" ")[0]} to contacts
+          </button>
         </section>
 
         <footer className="mt-10 text-center">
@@ -317,14 +327,19 @@ export default function TourPage() {
         </footer>
       </div>
 
-      {/* Sticky route bar */}
+      {/* Sticky route bar: opens turn-by-turn directions through every stop */}
       <div className="fixed bottom-4 left-0 right-0 z-40 px-4">
-        <div className="mx-auto flex max-w-3xl items-center justify-center gap-2 rounded-full bg-mr-dark px-6 py-3.5 text-sm font-semibold text-white shadow-2xl">
+        <a
+          href={googleDirectionsUrl(stops)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mx-auto flex max-w-3xl items-center justify-center gap-2 rounded-full bg-mr-dark px-6 py-3.5 text-sm font-semibold text-white shadow-2xl transition-transform hover:-translate-y-0.5"
+        >
           <span aria-hidden className="text-mr-light">
             ●
           </span>
           Start the full tour route · {stops.length} stops
-        </div>
+        </a>
       </div>
 
       <div className="mt-6 text-center text-xs text-body">

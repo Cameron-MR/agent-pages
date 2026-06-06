@@ -5,6 +5,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import Photo from "@/components/Photo";
 import { useAgentProfile } from "@/components/AgentProfileProvider";
+import { downloadVcard } from "@/lib/vcard";
 import { googleMapsEmbed, zillowUrl, appleMapsUrl } from "@/lib/mock/tour";
 import {
   DEFAULT_CMA,
@@ -287,6 +288,14 @@ export default function CmaLivePage() {
           >
             {shared ? "Link copied" : "Text this analysis to a client"}
           </button>
+          {/* Real .vcf download */}
+          <button
+            type="button"
+            onClick={() => downloadVcard(profile)}
+            className="mt-2 w-full rounded-full border border-white/30 bg-white/10 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+          >
+            Save {profile.name.split(" ")[0]} to contacts
+          </button>
         </section>
 
         <footer className="mt-10 text-center">
@@ -305,11 +314,19 @@ export default function CmaLivePage() {
         </footer>
       </div>
 
-      {/* Sticky CTA */}
+      {/* Sticky CTA: price + one-tap text to the agent */}
       <div className="fixed bottom-4 left-0 right-0 z-40 px-4">
-        <div className="mx-auto flex max-w-4xl items-center justify-center gap-2 rounded-full bg-mr-dark px-6 py-3.5 text-sm font-semibold text-white shadow-2xl">
-          <span aria-hidden className="text-mr-light">●</span>
-          Suggested list price {range.mid ? money(range.mid) : "—"}
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 rounded-full bg-mr-dark py-2 pl-6 pr-2 text-sm font-semibold text-white shadow-2xl">
+          <span className="flex items-center gap-2">
+            <span aria-hidden className="text-mr-light">●</span>
+            Suggested list price {range.mid ? money(range.mid) : "—"}
+          </span>
+          <a
+            href={`sms:${profile.phone.replace(/[^0-9+]/g, "")}?&body=${encodeURIComponent(`Hi ${profile.name.split(" ")[0]}, I reviewed the market analysis for ${s.address}. Let's talk pricing.`)}`}
+            className="rounded-full bg-mr-light px-4 py-2 text-xs font-semibold text-mr-dark transition-colors hover:bg-white"
+          >
+            Talk pricing
+          </a>
         </div>
       </div>
     </main>

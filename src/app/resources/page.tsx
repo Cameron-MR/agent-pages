@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageShell from "@/components/PageShell";
 import {
   RESOURCE_CATEGORIES,
@@ -9,18 +9,47 @@ import {
   type ResourceItem,
 } from "@/lib/mock/resources";
 
-type CategoryFilter = "All" | ResourceCategory;
+type CategoryFilter = "All" | "Favorites" | ResourceCategory;
 
-// Resources & Scripts library. Category tabs and a live search box filter the
-// grid; clicking a card opens a reader drawer with placeholder body copy.
+const FAVS_KEY = "mr-resource-favs";
+
+// Resources & Scripts library. Category tabs (including Favorites) and a live
+// search box filter the grid; cards open a reader drawer with working copy and
+// persisted favorites.
 export default function ResourcesPage() {
   const [category, setCategory] = useState<CategoryFilter>("All");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<ResourceItem | null>(null);
+  const [favs, setFavs] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(FAVS_KEY);
+      if (raw) setFavs(JSON.parse(raw) as string[]);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const toggleFav = (id: string) => {
+    setFavs((prev) => {
+      const next = prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : [...prev, id];
+      try {
+        window.localStorage.setItem(FAVS_KEY, JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
 
   const filtered = useMemo(() => {
     return RESOURCES.filter((r) => {
-      const matchCat = category === "All" || r.category === category;
+      const matchCat =
+        category === "All" ||
+        (category === "Favorites" ? favs.includes(r.id) : r.category === category);
       const q = query.trim().toLowerCase();
       const matchQuery =
         q === "" ||
@@ -29,7 +58,7 @@ export default function ResourcesPage() {
         r.tags.some((t) => t.toLowerCase().includes(q));
       return matchCat && matchQuery;
     });
-  }, [category, query]);
+  }, [category, query, favs]);
 
   return (
     <PageShell
@@ -40,7 +69,7 @@ export default function ResourcesPage() {
     >
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
-          {(["All", ...RESOURCE_CATEGORIES] as CategoryFilter[]).map((cat) => (
+          {(["All", "Favorites", ...RESOURCE_CATEGORIES] as CategoryFilter[]).map((cat) => (
             <button
               key={cat}
               type="button"
@@ -97,6 +126,11 @@ export default function ResourcesPage() {
                   ))}
                 </span>
                 <span className="flex-none text-xs text-mr-base">
+                  {favs.includes(r.id) ? (
+                    <span aria-label="Favorited" className="mr-1 text-mr-light">
+                      ★
+                    </span>
+                  ) : null}
                   {r.readMinutes} min
                 </span>
               </div>
@@ -105,19 +139,45 @@ export default function ResourcesPage() {
         </div>
       )}
 
-      <ReaderDrawer item={open} onClose={() => setOpen(null)} />
+      <ReaderDrawer
+        item={open}
+        isFav={open ? favs.includes(open.id) : false}
+        onToggleFav={toggleFav}
+        onClose={() => setOpen(null)}
+      />
     </PageShell>
   );
 }
 
 function ReaderDrawer({
   item,
+  isFav,
+  onToggleFav,
   onClose,
 }: {
   item: ResourceItem | null;
+  isFav: boolean;
+  onToggleFav: (id: string) => void;
   onClose: () => void;
 }) {
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    setCopied(false);
+  }, [item]);
   if (!item) return null;
+
+  const copyAll = () => {
+    const text = `${item.title}\n\n${item.body
+      .map((p, i) => `${i + 1}. ${p}`)
+      .join("\n")}`;
+    try {
+      navigator.clipboard?.writeText(text);
+    } catch {
+      // ignore
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1600);
+  };
   return (
     <div
       role="dialog"
@@ -165,17 +225,21 @@ function ReaderDrawer({
         <div className="mt-8 flex gap-2">
           <button
             type="button"
-            onClick={onClose}
+            onClick={copyAll}
             className="rounded-full bg-mr-base px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-mr-mid"
           >
-            Copy to clipboard
+            {copied ? "Copied" : "Copy to clipboard"}
           </button>
           <button
             type="button"
-            onClick={onClose}
-            className="rounded-full border border-mr-base/20 bg-white/70 px-5 py-2.5 text-sm font-semibold text-mr-base transition-colors hover:bg-white"
+            onClick={() => onToggleFav(item.id)}
+            className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
+              isFav
+                ? "bg-mr-light/25 text-mr-base"
+                : "border border-mr-base/20 bg-white/70 text-mr-base hover:bg-white"
+            }`}
           >
-            Save to favorites
+            {isFav ? "★ Saved to favorites" : "Save to favorites"}
           </button>
         </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageShell from "@/components/PageShell";
 import {
   PIPELINE_DEALS,
@@ -32,6 +32,16 @@ export default function PipelinePage() {
     };
     setDeals((prev) => prev.map((deal) => (deal.id === id ? shift(deal) : deal)));
     setOpenDeal((cur) => (cur && cur.id === id ? shift(cur) : cur));
+  };
+
+  // Logging a touch genuinely updates the record, so the board reflects it.
+  const logTouch = (id: string) => {
+    const touch = (deal: PipelineDeal): PipelineDeal => ({
+      ...deal,
+      lastTouch: "Just now",
+    });
+    setDeals((prev) => prev.map((deal) => (deal.id === id ? touch(deal) : deal)));
+    setOpenDeal((cur) => (cur && cur.id === id ? touch(cur) : cur));
   };
 
   const filtered = useMemo(() => {
@@ -163,7 +173,11 @@ export default function PipelinePage() {
         })}
       </div>
 
-      <DealDrawer deal={openDeal} onClose={() => setOpenDeal(null)} />
+      <DealDrawer
+        deal={openDeal}
+        onLogTouch={logTouch}
+        onClose={() => setOpenDeal(null)}
+      />
     </PageShell>
   );
 }
@@ -231,11 +245,19 @@ function DealCard({
 
 function DealDrawer({
   deal,
+  onLogTouch,
   onClose,
 }: {
   deal: PipelineDeal | null;
+  onLogTouch: (id: string) => void;
   onClose: () => void;
 }) {
+  const [recordOpen, setRecordOpen] = useState(false);
+  const [touched, setTouched] = useState(false);
+  useEffect(() => {
+    setRecordOpen(false);
+    setTouched(false);
+  }, [deal?.id]);
   if (!deal) return null;
   const stageLabel =
     PIPELINE_STAGE_META.find((s) => s.id === deal.stage)?.label ?? deal.stage;
@@ -306,24 +328,56 @@ function DealDrawer({
         <div className="mt-6 flex flex-col gap-2">
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => {
+              onLogTouch(deal.id);
+              setTouched(true);
+              setTimeout(() => setTouched(false), 1600);
+            }}
             className="rounded-full bg-mr-base px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-mr-mid"
           >
-            Log a touch
+            {touched ? "Touch logged" : "Log a touch"}
           </button>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => setRecordOpen((v) => !v)}
             className="rounded-full border border-mr-base/20 bg-white/70 px-5 py-2.5 text-sm font-semibold text-mr-base transition-colors hover:bg-white"
           >
-            Open client record
+            {recordOpen ? "Hide client record" : "Open client record"}
           </button>
         </div>
 
-        <p className="mt-6 text-xs text-body">
-          Placeholder client record. The live drawer would pull contact details,
-          analysis history, and scheduled touches from the CRM.
-        </p>
+        {recordOpen ? (
+          <div className="mt-4 rounded-xl border border-white/60 bg-white/60 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-mr-base">
+              Client record
+            </p>
+            <dl className="mt-2 space-y-1.5 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-body">Email</dt>
+                <dd className="font-medium text-mr-dark">
+                  {deal.name.split(" ")[0].toLowerCase()}@example.com
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-body">Phone</dt>
+                <dd className="font-medium text-mr-dark">(949) 555-0190</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-body">Pre-approval</dt>
+                <dd className="font-medium text-mr-dark">
+                  {deal.side === "Buyer" ? "On file" : "n/a"}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-body">Recent activity</dt>
+                <dd className="font-medium text-mr-dark">{deal.lastTouch}</dd>
+              </div>
+            </dl>
+            <p className="mt-2 text-xs text-body">
+              Sample record. The live drawer would pull this from the CRM.
+            </p>
+          </div>
+        ) : null}
       </div>
     </div>
   );

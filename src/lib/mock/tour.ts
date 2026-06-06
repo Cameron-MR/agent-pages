@@ -210,6 +210,62 @@ export function saveTour(tour: Tour) {
 }
 
 // ---------------------------------------------------------------------------
+// Saved tours: agents keep multiple named tours (one per client) and switch
+// between them. The active draft (STORAGE_KEY) is what the live page renders.
+// ---------------------------------------------------------------------------
+
+export interface SavedTour {
+  id: string;
+  name: string;
+  savedAt: string;
+  tour: Tour;
+}
+
+const SAVED_KEY = "mr-tours";
+
+export function loadSavedTours(): SavedTour[] {
+  try {
+    const raw = window.localStorage.getItem(SAVED_KEY);
+    const parsed = raw ? (JSON.parse(raw) as SavedTour[]) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveTourAs(name: string, tour: Tour): SavedTour[] {
+  const list = loadSavedTours().filter((t) => t.name !== name);
+  const next = [
+    {
+      id: "t" + Date.now(),
+      name,
+      savedAt: new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+      }),
+      tour,
+    },
+    ...list,
+  ];
+  try {
+    window.localStorage.setItem(SAVED_KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
+  return next;
+}
+
+export function deleteSavedTour(id: string): SavedTour[] {
+  const next = loadSavedTours().filter((t) => t.id !== id);
+  try {
+    window.localStorage.setItem(SAVED_KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
+  return next;
+}
+
+// ---------------------------------------------------------------------------
 // Deep links. These use real, keyless endpoints so the demo works without API
 // keys. For production, a Google Maps Embed API key gives a richer map.
 // ---------------------------------------------------------------------------
@@ -230,6 +286,24 @@ export function zillowUrl(s: { address: string; city: string }): string {
 // Apple Maps navigation to the property (opens Maps on Apple devices).
 export function appleMapsUrl(s: { address: string; city: string }): string {
   return `https://maps.apple.com/?daddr=${encodeURIComponent(fullAddress(s))}&dirflg=d`;
+}
+
+// Full-route Google Maps directions link (opens the Maps app/site with every
+// stop as a waypoint), used by the "Start the full tour route" action.
+export function googleDirectionsUrl(
+  stops: { address: string; city: string }[]
+): string {
+  if (stops.length === 0) return "https://www.google.com/maps";
+  if (stops.length === 1) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(fullAddress(stops[0]))}`;
+  }
+  const origin = encodeURIComponent(fullAddress(stops[0]));
+  const destination = encodeURIComponent(fullAddress(stops[stops.length - 1]));
+  const waypoints = stops
+    .slice(1, -1)
+    .map((s) => encodeURIComponent(fullAddress(s)))
+    .join("%7C");
+  return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypoints ? `&waypoints=${waypoints}` : ""}`;
 }
 
 // A keyless Google Maps embed. With multiple stops it draws the driving route

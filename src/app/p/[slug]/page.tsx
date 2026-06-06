@@ -6,6 +6,7 @@ import Logo from "@/components/Logo";
 import Photo from "@/components/Photo";
 import Carousel from "@/components/Carousel";
 import { useAgentProfile } from "@/components/AgentProfileProvider";
+import { downloadVcard } from "@/lib/vcard";
 import { propertyPhoto } from "@/lib/mock/images";
 import {
   loadConfig,
@@ -948,6 +949,14 @@ function Contact({
           </a>
           <a href={`mailto:${profile.email}`}>{profile.email}</a>
           <span>{profile.license}</span>
+          {/* Real .vcf download so a visitor can save the agent to contacts */}
+          <button
+            type="button"
+            onClick={() => downloadVcard(profile)}
+            className="rounded-full border border-mr-base/20 bg-white/70 px-4 py-1.5 text-xs font-semibold text-mr-base transition-colors hover:bg-white"
+          >
+            Save contact
+          </button>
         </div>
         <p className="mt-3 text-center text-xs text-body">
           Serving {SERVICE_AREAS.slice(0, 6).join(", ")}, and more.

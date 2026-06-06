@@ -17,8 +17,36 @@ export default function MainNav({ active }: { active?: string }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [allRead, setAllRead] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      setAllRead(window.localStorage.getItem("mr-notifs-read") === "1");
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const markAllRead = () => {
+    setAllRead(true);
+    try {
+      window.localStorage.setItem("mr-notifs-read", "1");
+    } catch {
+      // ignore
+    }
+  };
+
+  // Where each notification kind leads when clicked.
+  const notifHref = (kind: string) =>
+    kind === "lead"
+      ? "/pipeline"
+      : kind === "listing"
+      ? "/listings"
+      : kind === "transaction"
+      ? "/pipeline"
+      : "/p/jordan-sample";
 
   const primary = items.slice(0, primaryCount);
   const overflow = items.slice(primaryCount);
@@ -150,9 +178,11 @@ export default function MainNav({ active }: { active?: string }) {
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-mr-base px-1 text-[0.6rem] font-bold text-white">
-                {NOTIFICATIONS.length}
-              </span>
+              {!allRead ? (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-mr-base px-1 text-[0.6rem] font-bold text-white">
+                  {NOTIFICATIONS.length}
+                </span>
+              ) : null}
             </button>
 
             {bellOpen ? (
@@ -161,14 +191,20 @@ export default function MainNav({ active }: { active?: string }) {
                   <span className="font-heading text-sm font-bold text-mr-dark">
                     Notifications
                   </span>
-                  <span className="text-xs text-mr-base">
-                    {NOTIFICATIONS.length} new
-                  </span>
+                  <button
+                    type="button"
+                    onClick={markAllRead}
+                    className="text-xs font-medium text-mr-base hover:text-mr-mid"
+                  >
+                    {allRead ? "All read" : "Mark all read"}
+                  </button>
                 </div>
                 <div className="max-h-96 overflow-y-auto">
                   {NOTIFICATIONS.map((n) => (
-                    <div
+                    <Link
                       key={n.id}
+                      href={notifHref(n.kind)}
+                      onClick={() => setBellOpen(false)}
                       className="flex gap-3 border-b border-mr-base/5 px-4 py-3 last:border-0 hover:bg-mr-pale/10"
                     >
                       <span
@@ -192,7 +228,7 @@ export default function MainNav({ active }: { active?: string }) {
                           {n.time}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>

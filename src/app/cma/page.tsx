@@ -16,7 +16,11 @@ import {
   effectivePrice,
   money,
   SAMPLE_CMA_IDS,
+  loadSavedCmas,
+  saveCmaAs,
+  deleteSavedCma,
   type Cma,
+  type SavedCma,
 } from "@/lib/mock/cma";
 
 // CMA builder. The agent sets a subject home by MLS ID, adds comparable
@@ -28,10 +32,25 @@ export default function CmaPage() {
   const [cma, setCma] = useState<Cma>(DEFAULT_CMA);
   const [subjectId, setSubjectId] = useState("");
   const [compId, setCompId] = useState("");
+  const [saved, setSaved] = useState<SavedCma[]>([]);
+  const [savedNote, setSavedNote] = useState(false);
 
   useEffect(() => {
     setCma(loadCma());
+    setSaved(loadSavedCmas());
   }, []);
+
+  const saveCurrent = () => {
+    setSaved(saveCmaAs(`${cma.client} - ${cma.subject.address}`, cma));
+    saveCma(cma);
+    setSavedNote(true);
+    setTimeout(() => setSavedNote(false), 1600);
+  };
+
+  const loadSaved = (s: SavedCma) => {
+    setCma(s.cma);
+    saveCma(s.cma);
+  };
 
   const setSubject = (rawId: string) => {
     const rec = lookupCma(rawId);
@@ -71,21 +90,58 @@ export default function CmaPage() {
       title="CMA Builder"
       description="Build a comparative market analysis from MLS listing IDs. Pick a subject home and comps; the suggested range and market summary update live. Preview the client report or print a branded PDF. Sample MLS data."
     >
-      <div className="flex items-center justify-end gap-2">
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="rounded-full border border-mr-base/20 bg-white/70 px-4 py-2 text-sm font-semibold text-mr-base transition-colors hover:bg-white"
-        >
-          <span aria-hidden>⎙</span> Print report
-        </button>
-        <button
-          type="button"
-          onClick={preview}
-          className="rounded-full bg-mr-base px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-mr-mid"
-        >
-          Preview client report
-        </button>
+      {/* Saved analyses + actions */}
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/50 bg-white/60 p-4 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+        <span className="text-sm font-semibold text-mr-dark">Saved:</span>
+        {saved.length === 0 ? (
+          <span className="text-sm text-body">None yet.</span>
+        ) : (
+          saved.map((s) => (
+            <span
+              key={s.id}
+              className="flex items-center gap-1 rounded-full border border-mr-base/15 bg-white/70 py-1 pl-3 pr-1"
+            >
+              <button
+                type="button"
+                onClick={() => loadSaved(s)}
+                className="text-xs font-medium text-mr-dark hover:text-mr-base"
+              >
+                {s.name} <span className="text-mr-pale">· {s.savedAt}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSaved(deleteSavedCma(s.id))}
+                aria-label={`Delete ${s.name}`}
+                className="flex h-5 w-5 items-center justify-center rounded-full text-mr-base hover:bg-mr-pale/25"
+              >
+                &times;
+              </button>
+            </span>
+          ))
+        )}
+        <div className="ml-auto flex gap-2">
+          <button
+            type="button"
+            onClick={saveCurrent}
+            className="rounded-full border border-mr-base/20 bg-white/70 px-4 py-2 text-sm font-semibold text-mr-base transition-colors hover:bg-white"
+          >
+            {savedNote ? "Saved" : "Save"}
+          </button>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="rounded-full border border-mr-base/20 bg-white/70 px-4 py-2 text-sm font-semibold text-mr-base transition-colors hover:bg-white"
+          >
+            <span aria-hidden>⎙</span> Print report
+          </button>
+          <button
+            type="button"
+            onClick={preview}
+            className="rounded-full bg-mr-base px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-mr-mid"
+          >
+            Preview client report
+          </button>
+        </div>
       </div>
 
       {/* Subject + suggested range */}

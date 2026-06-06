@@ -1,9 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { todayItems, type StubContent } from "@/lib/mockData";
 
 interface TodayPanelProps {
   onOpenStub: (content: StubContent) => void;
+}
+
+// Completed task labels persist so checking off a task survives a refresh.
+const DONE_KEY = "mr-today-done";
+
+function loadDone(): string[] {
+  try {
+    const raw = window.localStorage.getItem(DONE_KEY);
+    const parsed = raw ? (JSON.parse(raw) as string[]) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
 }
 
 // Glass card wrapper for one Today column.
@@ -46,6 +60,24 @@ function Row({
 // "Today": appointments, tasks, deadlines, and hot leads. Each row opens the
 // shared stub modal so the cockpit feels live.
 export default function TodayPanel({ onOpenStub }: TodayPanelProps) {
+  const [done, setDone] = useState<string[]>([]);
+
+  useEffect(() => {
+    setDone(loadDone());
+  }, []);
+
+  const toggleTask = (label: string) => {
+    const next = done.includes(label)
+      ? done.filter((l) => l !== label)
+      : [...done, label];
+    setDone(next);
+    try {
+      window.localStorage.setItem(DONE_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  };
+
   return (
     <section>
       <h2 className="mb-4 font-heading text-2xl font-bold text-mr-dark">
@@ -73,31 +105,47 @@ export default function TodayPanel({ onOpenStub }: TodayPanelProps) {
         </Column>
 
         <Column title="Tasks">
-          {todayItems.tasks.map((task) => (
-            <Row
-              key={task.label}
-              onClick={() =>
-                onOpenStub({
-                  kind: `Task · ${task.priority === "high" ? "High" : "Medium"} priority`,
-                  title: task.label,
-                  detail:
-                    "Placeholder task. The live view would let the agent mark it complete, snooze it, or jump to the related record. Fabricated sample data.",
-                })
-              }
-            >
-              <span className="flex items-center gap-2">
-                <span
-                  aria-hidden
-                  className={`h-2.5 w-2.5 flex-none rounded-full ${
-                    task.priority === "high" ? "bg-mr-base" : "bg-mr-light"
+          {todayItems.tasks.map((task) => {
+            const isDone = done.includes(task.label);
+            return (
+              <div
+                key={task.label}
+                className="flex w-full items-center gap-2 rounded-xl border border-white/50 bg-white/70 p-3 shadow-sm transition duration-200 hover:border-mr-light/50 hover:shadow-md"
+              >
+                {/* Checking off a task persists across refreshes */}
+                <button
+                  type="button"
+                  onClick={() => toggleTask(task.label)}
+                  aria-label={isDone ? "Mark incomplete" : "Mark complete"}
+                  className={`flex h-5 w-5 flex-none items-center justify-center rounded-full border text-[0.65rem] font-bold transition-colors ${
+                    isDone
+                      ? "border-mr-base bg-mr-base text-white"
+                      : task.priority === "high"
+                      ? "border-mr-base text-transparent hover:text-mr-pale"
+                      : "border-mr-light text-transparent hover:text-mr-pale"
                   }`}
-                />
-                <span className="text-sm font-medium text-mr-dark">
+                >
+                  ✓
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onOpenStub({
+                      kind: `Task · ${task.priority === "high" ? "High" : "Medium"} priority`,
+                      title: task.label,
+                      detail:
+                        "Placeholder task. The live view would let the agent mark it complete, snooze it, or jump to the related record. Fabricated sample data.",
+                    })
+                  }
+                  className={`min-w-0 flex-1 text-left text-sm font-medium ${
+                    isDone ? "text-body line-through" : "text-mr-dark"
+                  }`}
+                >
                   {task.label}
-                </span>
-              </span>
-            </Row>
-          ))}
+                </button>
+              </div>
+            );
+          })}
         </Column>
 
         <Column title="Deadlines">

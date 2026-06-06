@@ -1,8 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { heroStats } from "@/lib/mockData";
 import { useAgentProfile } from "@/components/AgentProfileProvider";
+
+// Each hero stat deep-links to the page where the agent acts on it.
+const STAT_LINKS: Record<string, string> = {
+  "GCI year to date": "/production",
+  "Closings MTD": "/production",
+  "Under contract": "/pipeline",
+  "Active listings": "/listings",
+};
 
 // Full-width hero. Agent identity on the left, four headline stats on the
 // right, all sitting on a frosted glass panel over a teal-to-pale wash.
@@ -62,9 +71,10 @@ export default function HeroBanner() {
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:max-w-2xl">
           {heroStats.map((stat) => (
-            <div
+            <Link
               key={stat.label}
-              className="rounded-2xl border border-white/50 bg-white/70 p-4 shadow-sm backdrop-blur"
+              href={STAT_LINKS[stat.label] ?? "/production"}
+              className="rounded-2xl border border-white/50 bg-white/70 p-4 shadow-sm backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-mr-light/50 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-mr-light"
             >
               <p className="font-heading text-2xl font-bold text-mr-base">
                 {stat.value}
@@ -73,7 +83,7 @@ export default function HeroBanner() {
                 {stat.label}
               </p>
               <p className="mt-0.5 text-xs text-body">{stat.sub}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

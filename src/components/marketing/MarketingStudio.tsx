@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import SocialGraphic from "@/components/marketing/SocialGraphic";
 import FlyerPrint from "@/components/marketing/FlyerPrint";
+import { downloadSocialPng } from "@/lib/socialCanvas";
 import { useAgentProfile } from "@/components/AgentProfileProvider";
 import { LISTINGS } from "@/lib/mock/listings";
 import {
@@ -26,6 +27,13 @@ export default function MarketingStudio() {
   const [campaign, setCampaign] = useState<CampaignId>("just-listed");
   const [emailId, setEmailId] = useState(EMAIL_TEMPLATES[0].id);
   const [copied, setCopied] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<string | null>(null);
+
+  const download = async (format: "square" | "story") => {
+    setDownloading(format);
+    await downloadSocialPng({ listing, campaign, profile, format });
+    setDownloading(null);
+  };
 
   const listing = LISTINGS.find((l) => l.id === listingId) ?? LISTINGS[0];
   const caption = useMemo(
@@ -125,6 +133,14 @@ export default function MarketingStudio() {
               Feed post (1:1)
             </p>
             <SocialGraphic listing={listing} campaign={campaign} format="square" />
+            <button
+              type="button"
+              onClick={() => download("square")}
+              disabled={downloading === "square"}
+              className="mt-3 w-full rounded-full bg-mr-base px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-mr-mid disabled:opacity-60"
+            >
+              {downloading === "square" ? "Rendering PNG..." : "Download PNG (1080x1080)"}
+            </button>
           </div>
           <div>
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-mr-base">
@@ -132,6 +148,14 @@ export default function MarketingStudio() {
             </p>
             <div className="mx-auto max-w-[16rem]">
               <SocialGraphic listing={listing} campaign={campaign} format="story" />
+              <button
+                type="button"
+                onClick={() => download("story")}
+                disabled={downloading === "story"}
+                className="mt-3 w-full rounded-full bg-mr-base px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-mr-mid disabled:opacity-60"
+              >
+                {downloading === "story" ? "Rendering PNG..." : "Download PNG (1080x1920)"}
+              </button>
             </div>
           </div>
         </div>

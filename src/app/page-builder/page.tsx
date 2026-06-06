@@ -40,6 +40,7 @@ export default function PageBuilderPage() {
   const [audience, setAudience] = useState<Audience>("Public");
   const [config, setConfig] = useState<PageConfig>(defaultConfig);
   const [published, setPublished] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Load the saved config after mount so the builder matches the live page.
   useEffect(() => {
@@ -161,6 +162,24 @@ export default function PageBuilderPage() {
               </p>
             </div>
             <div className="flex gap-2">
+              {/* Real clipboard copy of the live page URL */}
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard?.writeText(
+                      `${window.location.origin}/p/jordan-sample`
+                    );
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1800);
+                  } catch {
+                    // ignore
+                  }
+                }}
+                className="rounded-full border border-mr-base/20 bg-white/70 px-5 py-2.5 text-sm font-semibold text-mr-base transition-colors hover:bg-white"
+              >
+                {copied ? "Copied" : "Copy link"}
+              </button>
               <Link
                 href="/p/jordan-sample"
                 className="rounded-full border border-mr-base/20 bg-white/70 px-5 py-2.5 text-sm font-semibold text-mr-base transition-colors hover:bg-white"

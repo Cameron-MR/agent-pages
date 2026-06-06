@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { PIPELINE_STAGES, type StubContent } from "@/lib/mockData";
 
 interface PipelineSnapshotProps {
@@ -22,6 +23,12 @@ export default function PipelineSnapshot({
             Sample clients moving through the pipeline. All names are made up.
           </p>
         </div>
+        <Link
+          href="/pipeline"
+          className="flex-none rounded-full border border-mr-base/20 bg-white/70 px-4 py-2 text-sm font-semibold text-mr-base transition-colors hover:bg-white"
+        >
+          Open pipeline
+        </Link>
       </div>
 
       <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0 lg:grid lg:grid-cols-5 lg:overflow-visible">

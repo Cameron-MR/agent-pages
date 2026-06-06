@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import Photo from "@/components/Photo";
+import { lookupMls } from "@/lib/mock/tour";
 import {
   LISTINGS,
   type Listing,
@@ -22,8 +23,11 @@ const STATUS_STYLES: Record<ListingStatus, string> = {
 // Listings management page. Photo-driven cards, status filter, headline
 // performance stats, and a detail drawer with a gallery. All fabricated.
 export default function ListingsPage() {
+  const [items, setItems] = useState<Listing[]>(LISTINGS);
   const [status, setStatus] = useState<StatusFilter>("All");
   const [open, setOpen] = useState<Listing | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [newMls, setNewMls] = useState("");
 
   const filters: StatusFilter[] = [
     "All",
@@ -33,14 +37,41 @@ export default function ListingsPage() {
     "Sold",
   ];
 
+  // Pull a listing from the MLS by ID and add it to the inventory. Mock data
+  // for now; the live MLS API plugs into lookupMls later.
+  const addListing = (rawId: string) => {
+    const rec = lookupMls(rawId);
+    if (!rec) return;
+    const listing: Listing = {
+      id: "L" + Date.now(),
+      address: rec.address,
+      city: rec.city,
+      price: rec.price,
+      beds: rec.beds,
+      baths: rec.baths,
+      sqft: rec.sqft,
+      status: "Coming Soon",
+      daysOnMarket: 0,
+      views: 0,
+      saves: 0,
+      showings: 0,
+      photo: rec.photo,
+      gallery: [rec.photo],
+      blurb: `Newly added from MLS ${rawId.trim().toUpperCase()}. Details will sync from the MLS.`,
+    };
+    setItems((prev) => [listing, ...prev]);
+    setNewMls("");
+    setAdding(false);
+  };
+
   const filtered = useMemo(
-    () => (status === "All" ? LISTINGS : LISTINGS.filter((l) => l.status === status)),
-    [status]
+    () => (status === "All" ? items : items.filter((l) => l.status === status)),
+    [status, items]
   );
 
-  const activeCount = LISTINGS.filter((l) => l.status === "Active").length;
-  const totalViews = LISTINGS.reduce((s, l) => s + l.views, 0);
-  const totalShowings = LISTINGS.reduce((s, l) => s + l.showings, 0);
+  const activeCount = items.filter((l) => l.status === "Active").length;
+  const totalViews = items.reduce((s, l) => s + l.views, 0);
+  const totalShowings = items.reduce((s, l) => s + l.showings, 0);
 
   return (
     <PageShell
@@ -88,12 +119,59 @@ export default function ListingsPage() {
         </div>
         <button
           type="button"
-          onClick={() => setOpen(LISTINGS[0])}
+          onClick={() => setAdding(true)}
           className="rounded-full bg-mr-base px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-mr-mid"
         >
           New listing
         </button>
       </div>
+
+      {/* Add by MLS ID */}
+      {adding ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setAdding(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-mr-dark/40 p-4 backdrop-blur-sm"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-3xl border border-white/70 bg-white p-7 shadow-2xl"
+          >
+            <h2 className="font-heading text-xl font-bold text-mr-dark">
+              Add a listing
+            </h2>
+            <p className="mt-1 text-sm text-body">
+              Enter the MLS listing ID and the details pull in automatically.
+              Mock MLS for now; try OC1001 through OC1006 or any ID.
+            </p>
+            <input
+              autoFocus
+              value={newMls}
+              onChange={(e) => setNewMls(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addListing(newMls)}
+              placeholder="MLS listing ID"
+              className="mt-4 w-full rounded-xl border border-mr-base/15 bg-white px-4 py-2.5 text-sm text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
+            />
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setAdding(false)}
+                className="flex-1 rounded-full border border-mr-base/20 bg-white/70 px-5 py-2.5 text-sm font-semibold text-mr-base hover:bg-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => addListing(newMls)}
+                className="flex-1 rounded-full bg-mr-base px-5 py-2.5 text-sm font-semibold text-white hover:bg-mr-mid"
+              >
+                Add listing
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((listing) => (

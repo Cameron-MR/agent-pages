@@ -200,13 +200,36 @@ export default function ShopPage() {
                   <p className="truncate text-xs text-body">{o.items}</p>
                   <p className="text-xs text-mr-pale">{o.date}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-mr-dark">
-                    {money(o.total)}
-                  </p>
-                  <span className="rounded-full bg-mr-pale/25 px-2 py-0.5 text-xs font-medium text-mr-base">
-                    {o.status}
-                  </span>
+                <div className="flex flex-none items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-mr-dark">
+                      {money(o.total)}
+                    </p>
+                    <span className="rounded-full bg-mr-pale/25 px-2 py-0.5 text-xs font-medium text-mr-base">
+                      {o.status}
+                    </span>
+                  </div>
+                  {/* Mock reorder: clones the order as a new Processing order */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOrders((prev) => [
+                        {
+                          ...o,
+                          id: "MR-" + String(Date.now()).slice(-6),
+                          date: new Date().toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "2-digit",
+                          }),
+                          status: "Processing",
+                        },
+                        ...prev,
+                      ])
+                    }
+                    className="rounded-full border border-mr-base/20 bg-white/70 px-3 py-1.5 text-xs font-semibold text-mr-base transition-colors hover:bg-white"
+                  >
+                    Reorder
+                  </button>
                 </div>
               </div>
             ))}

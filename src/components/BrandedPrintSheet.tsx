@@ -15,6 +15,8 @@ interface Props {
   // Optional inputs summary shown above the results.
   inputs?: PrintRow[];
   disclaimer?: string;
+  // Optional client name; renders a PREPARED FOR block in the meta band.
+  preparedFor?: string;
 }
 
 // Marshall Reddick brand palette (inline so it prints reliably).
@@ -38,6 +40,7 @@ export default function BrandedPrintSheet({
   rows,
   inputs,
   disclaimer,
+  preparedFor,
 }: Props) {
   const { profile } = useAgentProfile();
   const today = new Date().toLocaleDateString("en-US", {
@@ -118,6 +121,16 @@ export default function BrandedPrintSheet({
           </p>
         </div>
         <div style={{ textAlign: "right" }}>
+          {preparedFor ? (
+            <div style={{ marginBottom: 8 }}>
+              <p style={{ margin: 0, fontSize: 10, letterSpacing: 1.5, color: C.base, fontWeight: 700 }}>
+                PREPARED FOR
+              </p>
+              <p style={{ margin: "4px 0 0", fontSize: 14, fontWeight: 700 }}>
+                {preparedFor}
+              </p>
+            </div>
+          ) : null}
           <p style={{ margin: 0, fontSize: 10, letterSpacing: 1.5, color: C.base, fontWeight: 700 }}>
             MARKET
           </p>

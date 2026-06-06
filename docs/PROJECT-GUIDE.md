@@ -90,6 +90,10 @@ reuse it. Faked logic is expected; the value is the UI/UX and the data shapes.
 - **`/shop`** — Marketing Shop. Order print/signage/apparel/promo; cart,
   checkout (ship to home/office), saved cards (masked, demo), compliance
   auto-applied, order history.
+- **`/presentation`** — Listing Presentation builder: pick a listing and a
+  "prepared for" name; the branded document renders on screen (cover, agent,
+  MR advantage, marketing plan, pricing strategy, steps) and prints as-is
+  (its `#print-area` is visible, unlike the hidden print sheets).
 - **`/production`** — performance: President's/Chairman's Club meter, goal
   rings, monthly volume chart, commission ledger, office leaderboard.
 - **`/calculators`** — seller net sheet, funds to close, buyer affordability,
@@ -136,6 +140,12 @@ reuse it. Faked logic is expected; the value is the UI/UX and the data shapes.
 | `mr-shop-cards` | shop | Saved payment methods (masked last-4 only, demo) |
 | `mr-tour-draft` | tour | The tour the builder produced (read by `/tour/[slug]`) |
 | `mr-cma-draft` | cma | The CMA the builder produced (read by `/cma/[slug]`) |
+| `mr-tours` | tour | Named saved tours (load/save-as/delete in the builder) |
+| `mr-cmas` | cma | Named saved CMAs (load/save-as/delete in the builder) |
+| `mr-resource-favs` | resources | Favorited resource IDs (Favorites filter) |
+| `mr-notifs-read` | MainNav | "Mark all read" flag for the notifications bell |
+| `mr-training-progress` | training | Completed-lesson counts per course |
+| `mr-today-done` | TodayPanel | Checked-off Today task labels |
 
 Pattern: a `load*()` returns defaults when storage is empty/invalid and repairs
 shape; a `save*()` writes JSON; builder pages write, client pages read on mount.
@@ -203,6 +213,35 @@ Newest first. Add an entry each working session.
 - **Agent-only tour share button.** The client tour page hides "Text this
   tour to a client" from clients. The Tour Builder opens the page with
   `?view=agent`, the only view that shows it.
+- **Overnight interaction pass (every click does something).**
+  - Saved tours and saved CMAs: name, save, reload, and delete multiple
+    analyses per agent (`mr-tours`, `mr-cmas`).
+  - Marketing Studio social graphics download as real PNGs
+    (`src/lib/socialCanvas.ts`, canvas render at 1080x1080 / 1080x1920).
+  - New `/presentation` Listing Presentation: an on-screen branded document
+    (cover, agent, MR advantage, marketing plan, pricing strategy, steps)
+    printable as-is; linked from Marketing.
+  - Resources: favorites (star + Favorites filter) and a working "copy all"
+    in the reader drawer.
+  - Pipeline: "Log touch" updates last-touch on the card and drawer; drawer
+    gained an expandable mock client record.
+  - Listings: "New listing" adds inventory by MLS ID through `lookupMls`.
+  - Tour page: sticky bar opens a full Google Maps directions route through
+    every stop (`googleDirectionsUrl`).
+  - Notifications: items navigate by kind, badge clears with Mark all read.
+  - Dashboard: Market pulse stats expand into talking points with a mini
+    trend bar; Company announcements expand with a deep link by tag.
+  - CMA report adds a comp photo gallery; calculators take an optional
+    "Prepared for" client name that prints on the branded PDF.
+  - Training: working faux course player; "Complete lesson" advances saved
+    progress (`mr-training-progress`).
+  - Today tasks check off and persist (`mr-today-done`); hero stats deep-link
+    to Production/Pipeline/Listings; Pipeline Snapshot links to /pipeline.
+  - Shop: Reorder clones a past order into a new Processing order.
+  - Client CMA page sticky bar adds a one-tap "Talk pricing" text-the-agent
+    action.
+  - "Save contact" vCard download (`src/lib/vcard.ts`, real .vcf) on the
+    public page, tour page, and CMA page agent cards.
 - **CMA overhaul + this guide.** CMA now MLS-ID driven with rich comp records,
   live suggested range + market summary; new live client CMA page
   (`/cma/[slug]`) and a redesigned multi-section branded CMA report

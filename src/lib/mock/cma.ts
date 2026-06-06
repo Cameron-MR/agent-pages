@@ -270,3 +270,59 @@ export function saveCma(cma: Cma) {
     // ignore
   }
 }
+
+// ---------------------------------------------------------------------------
+// Saved analyses: agents keep multiple named CMAs (one per client/home) and
+// switch between them. The active draft is what the live page renders.
+// ---------------------------------------------------------------------------
+
+export interface SavedCma {
+  id: string;
+  name: string;
+  savedAt: string;
+  cma: Cma;
+}
+
+const SAVED_KEY = "mr-cmas";
+
+export function loadSavedCmas(): SavedCma[] {
+  try {
+    const raw = window.localStorage.getItem(SAVED_KEY);
+    const parsed = raw ? (JSON.parse(raw) as SavedCma[]) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveCmaAs(name: string, cma: Cma): SavedCma[] {
+  const list = loadSavedCmas().filter((c) => c.name !== name);
+  const next = [
+    {
+      id: "c" + Date.now(),
+      name,
+      savedAt: new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+      }),
+      cma,
+    },
+    ...list,
+  ];
+  try {
+    window.localStorage.setItem(SAVED_KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
+  return next;
+}
+
+export function deleteSavedCma(id: string): SavedCma[] {
+  const next = loadSavedCmas().filter((c) => c.id !== id);
+  try {
+    window.localStorage.setItem(SAVED_KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
+  return next;
+}

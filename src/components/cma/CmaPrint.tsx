@@ -231,6 +231,42 @@ export default function CmaPrint({
         </table>
       </Section>
 
+      {/* Comp photo gallery */}
+      <Section label="Comparables at a glance">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+          {cma.comps.slice(0, 6).map((c) => (
+            <div
+              key={c.id}
+              style={{
+                width: "calc(33.33% - 7px)",
+                border: `1px solid ${C.line}`,
+                borderRadius: 10,
+                overflow: "hidden",
+                background: "#fff",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={c.photo}
+                alt={c.address}
+                style={{ width: "100%", height: 84, objectFit: "cover", display: "block" }}
+              />
+              <div style={{ padding: "7px 9px" }}>
+                <p style={{ margin: 0, fontSize: 10.5, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {c.address}
+                </p>
+                <p style={{ margin: "2px 0 0", fontSize: 9.5, color: C.muted }}>
+                  {c.status} · {c.beds}/{c.baths} · {c.sqft.toLocaleString()} sqft
+                </p>
+                <p style={{ margin: "2px 0 0", fontSize: 11.5, fontWeight: 700, color: C.base }}>
+                  {money(effectivePrice(c))}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
       {/* Footer */}
       <div style={{ marginTop: 24, paddingTop: 12, borderTop: `2px solid ${C.base}` }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>

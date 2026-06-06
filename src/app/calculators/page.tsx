@@ -20,6 +20,7 @@ const TOOLS: { id: Tool; label: string; desc: string }[] = [
 // dialog. Figures and default rates are illustrative.
 export default function CalculatorsPage() {
   const [tool, setTool] = useState<Tool>("net");
+  const [client, setClient] = useState("");
 
   return (
     <PageShell
@@ -53,9 +54,23 @@ export default function CalculatorsPage() {
       </div>
 
       <div className="max-w-2xl">
-        {tool === "net" ? <NetSheet /> : null}
-        {tool === "funds" ? <FundsToClose /> : null}
-        {tool === "afford" ? <Affordability /> : null}
+        {tool !== "commission" ? (
+          <label className="mb-4 block">
+            <span className="mb-1 block text-sm font-medium text-mr-dark">
+              Prepared for (optional, prints on the PDF)
+            </span>
+            <input
+              value={client}
+              onChange={(e) => setClient(e.target.value)}
+              placeholder="Client name, e.g. The Sample Family"
+              className="w-full rounded-xl border border-mr-base/15 bg-white px-4 py-2.5 text-sm text-mr-dark outline-none focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
+            />
+          </label>
+        ) : null}
+
+        {tool === "net" ? <NetSheet client={client} /> : null}
+        {tool === "funds" ? <FundsToClose client={client} /> : null}
+        {tool === "afford" ? <Affordability client={client} /> : null}
         {tool === "commission" ? <Commission /> : null}
       </div>
     </PageShell>
@@ -160,7 +175,7 @@ function ResultRow({
 
 // ---- Seller net sheet -----------------------------------------------------
 
-function NetSheet() {
+function NetSheet({ client }: { client: string }) {
   const [price, setPrice] = useState(1200000);
   const [payoff, setPayoff] = useState(450000);
   const [commissionPct, setCommissionPct] = useState(5);
@@ -207,6 +222,7 @@ function NetSheet() {
         subtitle="Estimated proceeds from your home sale"
         inputs={inputs}
         rows={rows}
+        preparedFor={client || undefined}
       />
     </>
   );
@@ -214,7 +230,7 @@ function NetSheet() {
 
 // ---- Funds to close (how much to buy) -------------------------------------
 
-function FundsToClose() {
+function FundsToClose({ client }: { client: string }) {
   const [price, setPrice] = useState(900000);
   const [downPct, setDownPct] = useState(20);
   const [closingPct, setClosingPct] = useState(3);
@@ -262,6 +278,7 @@ function FundsToClose() {
         subtitle="Estimated cash needed to purchase"
         inputs={inputs}
         rows={rows}
+        preparedFor={client || undefined}
       />
     </>
   );
@@ -269,7 +286,7 @@ function FundsToClose() {
 
 // ---- Buyer affordability --------------------------------------------------
 
-function Affordability() {
+function Affordability({ client }: { client: string }) {
   const [monthly, setMonthly] = useState(5000);
   const [down, setDown] = useState(100000);
   const [rate, setRate] = useState(6.5);
@@ -327,6 +344,7 @@ function Affordability() {
         subtitle="What your monthly budget can buy"
         inputs={inputs}
         rows={rows}
+        preparedFor={client || undefined}
       />
     </>
   );

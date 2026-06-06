@@ -40,6 +40,12 @@ export default function MarketingPage() {
             </div>
             <div className="flex flex-none flex-wrap gap-2">
               <Link
+                href="/presentation"
+                className="rounded-full border border-mr-base/20 bg-white/70 px-5 py-3 text-sm font-semibold text-mr-base shadow-sm transition-colors hover:bg-white"
+              >
+                Listing presentation
+              </Link>
+              <Link
                 href="/tour-builder"
                 className="rounded-full border border-mr-base/20 bg-white/70 px-5 py-3 text-sm font-semibold text-mr-base shadow-sm transition-colors hover:bg-white"
               >

@@ -11,8 +11,12 @@ import {
   saveTour,
   lookupMls,
   SAMPLE_MLS_IDS,
+  loadSavedTours,
+  saveTourAs,
+  deleteSavedTour,
   type Tour,
   type TourStop,
+  type SavedTour,
 } from "@/lib/mock/tour";
 
 // Property Tour Builder. The agent assembles an ordered tour of homes by MLS
@@ -25,10 +29,25 @@ export default function TourBuilderPage() {
   const [tour, setTour] = useState<Tour>(DEFAULT_TOUR);
   const [mlsId, setMlsId] = useState("");
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState<SavedTour[]>([]);
+  const [savedNote, setSavedNote] = useState(false);
 
   useEffect(() => {
     setTour(loadTour());
+    setSaved(loadSavedTours());
   }, []);
+
+  const saveCurrent = () => {
+    setSaved(saveTourAs(tour.client || tour.headline || "Untitled tour", tour));
+    saveTour(tour);
+    setSavedNote(true);
+    setTimeout(() => setSavedNote(false), 1600);
+  };
+
+  const loadSaved = (s: SavedTour) => {
+    setTour(s.tour);
+    saveTour(s.tour);
+  };
 
   const update = (patch: Partial<Tour>) => setTour((t) => ({ ...t, ...patch }));
 
@@ -84,6 +103,51 @@ export default function TourBuilderPage() {
       description="Assemble a branded tour of homes for a client by MLS listing ID, set showing times, and share a beautiful tour page. Property details pull from the MLS. Sample data only."
     >
       <div className="flex flex-col gap-6">
+        {/* Saved tours */}
+        <section className="rounded-2xl border border-white/50 bg-white/60 p-4 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold text-mr-dark">
+              Saved tours:
+            </span>
+            {saved.length === 0 ? (
+              <span className="text-sm text-body">
+                None yet. Build one and hit Save.
+              </span>
+            ) : (
+              saved.map((s) => (
+                <span
+                  key={s.id}
+                  className="flex items-center gap-1 rounded-full border border-mr-base/15 bg-white/70 py-1 pl-3 pr-1"
+                >
+                  <button
+                    type="button"
+                    onClick={() => loadSaved(s)}
+                    className="text-xs font-medium text-mr-dark hover:text-mr-base"
+                  >
+                    {s.name}{" "}
+                    <span className="text-mr-pale">· {s.savedAt}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSaved(deleteSavedTour(s.id))}
+                    aria-label={`Delete ${s.name}`}
+                    className="flex h-5 w-5 items-center justify-center rounded-full text-mr-base hover:bg-mr-pale/25"
+                  >
+                    &times;
+                  </button>
+                </span>
+              ))
+            )}
+            <button
+              type="button"
+              onClick={saveCurrent}
+              className="ml-auto rounded-full border border-mr-base/20 bg-white/70 px-4 py-1.5 text-xs font-semibold text-mr-base hover:bg-white"
+            >
+              {savedNote ? "Saved" : "Save current tour"}
+            </button>
+          </div>
+        </section>
+
         {/* 1. Tour details */}
         <section className="rounded-2xl border border-white/50 bg-white/60 p-6 shadow-sm backdrop-blur-xl backdrop-saturate-150">
           <h2 className="font-heading text-lg font-bold text-mr-dark">
