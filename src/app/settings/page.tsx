@@ -110,6 +110,77 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Public page content */}
+      <section className="mt-6 rounded-2xl border border-white/50 bg-white/60 p-6 shadow-sm backdrop-blur-xl backdrop-saturate-150">
+        <h2 className="font-heading text-lg font-bold text-mr-dark">
+          Public page content
+        </h2>
+        <p className="mt-1 text-sm text-body">
+          Edit the words and About photo that show on your client-facing page.
+        </p>
+        <div className="mt-4 grid grid-cols-1 gap-4">
+          <TextField
+            label="Hero headline"
+            value={draft.headline}
+            onChange={field("headline")}
+          />
+          <TextField
+            label="Tagline / personal quote"
+            value={draft.tagline}
+            onChange={field("tagline")}
+          />
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-mr-dark">
+              About / bio
+            </span>
+            <textarea
+              rows={4}
+              value={draft.bio}
+              onChange={(e) => field("bio")(e.target.value)}
+              className="w-full rounded-xl border border-mr-base/15 bg-white px-3 py-2.5 text-sm text-mr-dark outline-none transition focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-mr-dark">
+              Specialties (comma separated)
+            </span>
+            <input
+              type="text"
+              value={draft.specialties.join(", ")}
+              onChange={(e) =>
+                setDraft((d) => ({
+                  ...d,
+                  specialties: e.target.value
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                }))
+              }
+              className="w-full rounded-xl border border-mr-base/15 bg-white px-3 py-2.5 text-sm text-mr-dark outline-none transition focus:border-mr-light focus:ring-2 focus:ring-mr-light/40"
+            />
+          </label>
+          <TextField
+            label="About photo URL"
+            value={draft.aboutPhoto}
+            onChange={field("aboutPhoto")}
+          />
+        </div>
+        <div className="mt-5 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onSave}
+            className="rounded-full bg-mr-base px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-mr-mid"
+          >
+            Save content
+          </button>
+          {saved ? (
+            <span className="rounded-full bg-mr-light/20 px-3 py-1 text-xs font-semibold text-mr-base">
+              Saved
+            </span>
+          ) : null}
+        </div>
+      </section>
+
       <TopBarCustomizer />
     </PageShell>
   );

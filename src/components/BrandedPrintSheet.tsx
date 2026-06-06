@@ -17,10 +17,21 @@ interface Props {
   disclaimer?: string;
 }
 
-// A Marshall Reddick branded, agent-personalized print sheet. Hidden on screen
-// (.print-sheet) and shown alone when printing (#print-area, see globals.css).
-// Used by the calculators so any result can be saved as a branded PDF via the
-// browser's print-to-PDF. Only one of these should be mounted at a time.
+// Marshall Reddick brand palette (inline so it prints reliably).
+const C = {
+  base: "#316878",
+  dark: "#1C3C45",
+  light: "#50AAC4",
+  pale: "#8BB8C4",
+  tint: "#EEF4F6",
+  body: "#555555",
+  muted: "#8a8a8a",
+  line: "#e3e9eb",
+};
+
+// A polished, branded print template shared by the calculators and the CMA
+// builder. Teal header band, agent block, a bold "bottom line" result, a clean
+// breakdown table, and an Equal Housing footer. Hidden on screen, printed alone.
 export default function BrandedPrintSheet({
   title,
   subtitle,
@@ -35,144 +46,187 @@ export default function BrandedPrintSheet({
     day: "numeric",
   });
 
+  const strongRows = rows.filter((r) => r.strong);
+  const lineRows = rows.filter((r) => !r.strong);
+
   return (
-    <div id="print-area" className="print-sheet text-[#1C3C45]">
+    <div
+      id="print-area"
+      className="print-sheet"
+      style={{ color: C.dark, fontFamily: "var(--font-open-sans), sans-serif" }}
+    >
       {/* Header band */}
       <div
         style={{
+          background: C.base,
+          color: "#fff",
+          borderRadius: 14,
+          padding: "22px 26px",
           display: "flex",
-          alignItems: "flex-start",
+          alignItems: "center",
           justifyContent: "space-between",
-          borderBottom: "3px solid #316878",
-          paddingBottom: 16,
         }}
       >
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logos/colored-logo.svg" alt="Marshall Reddick Real Estate" width={260} />
-          <p style={{ marginTop: 8, fontSize: 11, color: "#555" }}>
-            Real Estate | Property Management | Private Lending
+          <img src="/logos/white-logo.svg" alt="Marshall Reddick Real Estate" width={210} />
+          <p style={{ margin: "8px 0 0", fontSize: 10, letterSpacing: 1, color: "rgba(255,255,255,0.8)" }}>
+            REAL ESTATE &nbsp;|&nbsp; PROPERTY MANAGEMENT &nbsp;|&nbsp; PRIVATE LENDING
           </p>
         </div>
-        <div style={{ textAlign: "right", fontSize: 12, lineHeight: 1.5 }}>
-          <p style={{ fontWeight: 700, fontSize: 15, color: "#1C3C45" }}>
+        <div style={{ textAlign: "right" }}>
+          <p style={{ margin: 0, fontSize: 11, letterSpacing: 2, color: "rgba(255,255,255,0.75)" }}>
+            PREPARED {today.toUpperCase()}
+          </p>
+          <h1 style={{ margin: "4px 0 0", fontSize: 22, fontWeight: 700, fontFamily: "var(--font-raleway), sans-serif" }}>
+            {title}
+          </h1>
+          {subtitle ? (
+            <p style={{ margin: "2px 0 0", fontSize: 12, color: "rgba(255,255,255,0.85)" }}>
+              {subtitle}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Agent + market meta */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 16,
+          marginTop: 18,
+          paddingBottom: 14,
+          borderBottom: `1px solid ${C.line}`,
+        }}
+      >
+        <div>
+          <p style={{ margin: 0, fontSize: 10, letterSpacing: 1.5, color: C.base, fontWeight: 700 }}>
+            PREPARED BY
+          </p>
+          <p style={{ margin: "4px 0 0", fontSize: 14, fontWeight: 700 }}>
             {profile.name}
           </p>
-          <p style={{ color: "#555" }}>{profile.title}</p>
-          <p style={{ color: "#316878" }}>{profile.phone}</p>
-          <p style={{ color: "#316878" }}>{profile.email}</p>
-          <p style={{ color: "#555" }}>{profile.license}</p>
+          <p style={{ margin: "1px 0 0", fontSize: 12, color: C.body }}>
+            {profile.title}, {profile.brokerage}
+          </p>
+          <p style={{ margin: "1px 0 0", fontSize: 12, color: C.base }}>
+            {profile.phone} &nbsp;·&nbsp; {profile.email}
+          </p>
+          <p style={{ margin: "1px 0 0", fontSize: 11, color: C.muted }}>
+            {profile.license}
+          </p>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <p style={{ margin: 0, fontSize: 10, letterSpacing: 1.5, color: C.base, fontWeight: 700 }}>
+            MARKET
+          </p>
+          <p style={{ margin: "4px 0 0", fontSize: 13, color: C.dark }}>
+            {profile.market}
+          </p>
         </div>
       </div>
 
-      {/* Title */}
-      <div style={{ marginTop: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: "#1C3C45", margin: 0 }}>
-          {title}
-        </h1>
-        {subtitle ? (
-          <p style={{ marginTop: 4, color: "#555", fontSize: 13 }}>{subtitle}</p>
-        ) : null}
-        <p style={{ marginTop: 4, color: "#8a8a8a", fontSize: 12 }}>
-          Prepared {today} for {profile.market}
-        </p>
-      </div>
-
-      {/* Inputs */}
-      {inputs && inputs.length ? (
-        <div style={{ marginTop: 24 }}>
-          <p
-            style={{
-              fontSize: 11,
-              textTransform: "uppercase",
-              letterSpacing: 1,
-              color: "#316878",
-              fontWeight: 700,
-              marginBottom: 8,
-            }}
-          >
-            Assumptions
-          </p>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-            <tbody>
-              {inputs.map((r) => (
-                <tr key={r.label}>
-                  <td style={{ padding: "6px 0", color: "#555" }}>{r.label}</td>
-                  <td style={{ padding: "6px 0", textAlign: "right", color: "#1C3C45" }}>
-                    {r.value}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Bottom-line hero result(s) */}
+      {strongRows.length ? (
+        <div
+          style={{
+            marginTop: 18,
+            borderRadius: 14,
+            background: C.base,
+            color: "#fff",
+            padding: "18px 24px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 16,
+          }}
+        >
+          {strongRows.map((r) => (
+            <div key={r.label} style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontSize: 11, letterSpacing: 1, color: "rgba(255,255,255,0.8)" }}>
+                {r.label.toUpperCase()}
+              </p>
+              <p style={{ margin: "4px 0 0", fontSize: 30, fontWeight: 700, fontFamily: "var(--font-raleway), sans-serif" }}>
+                {r.value}
+              </p>
+            </div>
+          ))}
         </div>
       ) : null}
 
-      {/* Results */}
-      <div style={{ marginTop: 24 }}>
-        <p
-          style={{
-            fontSize: 11,
-            textTransform: "uppercase",
-            letterSpacing: 1,
-            color: "#316878",
-            fontWeight: 700,
-            marginBottom: 8,
-          }}
-        >
-          Summary
-        </p>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
-          <tbody>
-            {rows.map((r) => (
-              <tr
-                key={r.label}
-                style={r.strong ? { borderTop: "2px solid #316878" } : undefined}
-              >
-                <td
-                  style={{
-                    padding: "10px 0",
-                    color: r.strong ? "#1C3C45" : "#555",
-                    fontWeight: r.strong ? 700 : 400,
-                  }}
-                >
-                  {r.label}
-                </td>
-                <td
-                  style={{
-                    padding: "10px 0",
-                    textAlign: "right",
-                    color: r.strong ? "#316878" : "#1C3C45",
-                    fontWeight: r.strong ? 700 : 500,
-                    fontSize: r.strong ? 18 : 14,
-                  }}
-                >
-                  {r.value}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* Assumptions */}
+      {inputs && inputs.length ? (
+        <Section label="Assumptions">
+          <Table rows={inputs} />
+        </Section>
+      ) : null}
+
+      {/* Breakdown */}
+      <Section label="Breakdown">
+        <Table rows={lineRows.length ? lineRows : rows} />
+      </Section>
 
       {/* Footer */}
-      <div
-        style={{
-          marginTop: 40,
-          borderTop: "1px solid #ddd",
-          paddingTop: 12,
-          fontSize: 10,
-          color: "#8a8a8a",
-        }}
-      >
-        <p>
+      <div style={{ marginTop: 26, paddingTop: 12, borderTop: `2px solid ${C.base}` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+          <span aria-hidden style={{ color: C.base, fontSize: 13 }}>
+            &#8962;
+          </span>
+          <span style={{ fontSize: 10, color: C.body, fontWeight: 600 }}>
+            Equal Housing Opportunity
+          </span>
+        </div>
+        <p style={{ margin: 0, fontSize: 9.5, color: C.muted, lineHeight: 1.5 }}>
           {disclaimer ??
-            "Estimate only. Figures are illustrative and not a guarantee, appraisal, or lending offer."}
-        </p>
-        <p style={{ marginTop: 4 }}>
-          {profile.brokerage} · Reference sample. Not based on real client data.
+            "Estimate only. Figures are illustrative and not a guarantee, appraisal, or lending offer."}{" "}
+          {profile.brokerage} · {profile.address} · {profile.license}. Reference
+          sample. Not based on real client data.
         </p>
       </div>
     </div>
   );
+
+  function Section({
+    label,
+    children,
+  }: {
+    label: string;
+    children: React.ReactNode;
+  }) {
+    return (
+      <div style={{ marginTop: 18 }}>
+        <p style={{ margin: "0 0 8px", fontSize: 10, letterSpacing: 1.5, color: C.base, fontWeight: 700 }}>
+          {label.toUpperCase()}
+        </p>
+        {children}
+      </div>
+    );
+  }
+
+  function Table({ rows: tableRows }: { rows: PrintRow[] }) {
+    return (
+      <div style={{ borderRadius: 12, overflow: "hidden", border: `1px solid ${C.line}` }}>
+        {tableRows.map((r, i) => (
+          <div
+            key={r.label}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 16px",
+              background: i % 2 === 0 ? C.tint : "#fff",
+              fontSize: 13,
+            }}
+          >
+            <span style={{ color: r.strong ? C.dark : C.body, fontWeight: r.strong ? 700 : 400 }}>
+              {r.label}
+            </span>
+            <span style={{ color: C.dark, fontWeight: r.strong ? 700 : 500 }}>
+              {r.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
 }

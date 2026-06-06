@@ -27,6 +27,10 @@ h1, h2, h3, h4, h5, h6 {
   display: none;
 }
 
+@page {
+  margin: 0.45in;
+}
+
 @media print {
   body {
     background: #ffffff;
@@ -43,7 +47,14 @@ h1, h2, h3, h4, h5, h6 {
     position: absolute;
     inset: 0;
     margin: 0;
-    padding: 32px;
+    padding: 0;
     width: 100%;
+    /* Force background colors (teal header bands, tints) to print. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #print-area * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

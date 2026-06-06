@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import Photo from "@/components/Photo";
+import { useAgentProfile } from "@/components/AgentProfileProvider";
 import { propertyPhoto } from "@/lib/mock/images";
 import {
   loadConfig,
@@ -27,6 +28,7 @@ import {
 // modules the agent enabled for the Public audience in the page builder, in
 // the shared render order. All content is fabricated.
 export default function PublicPage() {
+  const { profile } = useAgentProfile();
   const [enabled, setEnabled] = useState<ModuleId[]>(MODULE_ORDER);
   const [sentContact, setSentContact] = useState(false);
   const [sentValuation, setSentValuation] = useState(false);
@@ -104,8 +106,8 @@ export default function PublicPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <Logo theme="dark" variant="logotype" width={150} />
           <p className="mt-3">
-            {PUBLIC_AGENT.brokerage} · Real Estate | Property Management |
-            Private Lending
+            {profile.brokerage} · Real Estate | Property Management | Private
+            Lending
           </p>
           <p className="mt-2">
             Fabricated sample page for reference design. Not a live listing
@@ -140,6 +142,7 @@ function SectionHead({ eyebrow, title }: { eyebrow: string; title: string }) {
 }
 
 function Hero() {
+  const { profile } = useAgentProfile();
   return (
     <section className="relative overflow-hidden text-white">
       <Photo
@@ -154,13 +157,13 @@ function Hero() {
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 pb-20 pt-28 sm:px-6 lg:grid-cols-2">
         <div>
           <p className="text-sm font-semibold uppercase tracking-widest text-mr-pale">
-            {PUBLIC_AGENT.market}
+            {profile.market}
           </p>
           <h1 className="mt-3 font-heading text-4xl font-bold leading-tight drop-shadow sm:text-5xl">
-            {PUBLIC_AGENT.headline}
+            {profile.headline}
           </h1>
           <p className="mt-4 max-w-md italic text-white/90">
-            &ldquo;{PUBLIC_AGENT.tagline}&rdquo;
+            &ldquo;{profile.tagline}&rdquo;
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <a
@@ -181,17 +184,15 @@ function Hero() {
         <div className="rounded-3xl border border-white/20 bg-white/10 p-7 shadow-2xl backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <Photo
-              src={PUBLIC_AGENT.photo}
-              alt={PUBLIC_AGENT.name}
+              src={profile.photo}
+              alt={profile.name}
               className="h-20 w-20 flex-none rounded-full object-cover object-[center_20%] ring-4 ring-white/30"
             />
             <div>
-              <p className="font-heading text-xl font-bold">
-                {PUBLIC_AGENT.name}
-              </p>
-              <p className="text-sm text-white/80">{PUBLIC_AGENT.title}</p>
-              <p className="text-sm text-mr-pale">{PUBLIC_AGENT.brokerage}</p>
-              <p className="mt-1 text-xs text-white/70">{PUBLIC_AGENT.license}</p>
+              <p className="font-heading text-xl font-bold">{profile.name}</p>
+              <p className="text-sm text-white/80">{profile.title}</p>
+              <p className="text-sm text-mr-pale">{profile.brokerage}</p>
+              <p className="mt-1 text-xs text-white/70">{profile.license}</p>
             </div>
           </div>
           <div className="mt-6 grid grid-cols-4 gap-2">
@@ -306,12 +307,13 @@ function Featured() {
 }
 
 function About() {
+  const { profile } = useAgentProfile();
   return (
     <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <div className="grid items-center gap-10 lg:grid-cols-2">
         <Photo
-          src={PUBLIC_AGENT.familyPhoto}
-          alt={`${PUBLIC_AGENT.name} and family`}
+          src={profile.aboutPhoto}
+          alt={`${profile.name} and family`}
           className="h-80 w-full rounded-3xl object-cover shadow-lg"
         />
         <div>
@@ -319,16 +321,16 @@ function About() {
             About
           </p>
           <h2 className="mt-1 font-heading text-3xl font-bold text-mr-dark">
-            Get to know {PUBLIC_AGENT.name.split(" ")[0]}
+            Get to know {profile.name.split(" ")[0]}
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-body">
-            {PUBLIC_AGENT.personalBio}
+            {profile.bio}
           </p>
           <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-mr-base">
             Specialties
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {PUBLIC_AGENT.specialties.map((s) => (
+            {profile.specialties.map((s) => (
               <span
                 key={s}
                 className="rounded-full border border-mr-base/15 bg-white/70 px-3 py-1 text-sm text-mr-dark"
@@ -538,6 +540,7 @@ function Events() {
 }
 
 function Education() {
+  const { profile } = useAgentProfile();
   return (
     <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <SectionHead eyebrow="Education" title="Tips and market insights" />
@@ -562,7 +565,7 @@ function Education() {
                 {item.title}
               </h3>
               <p className="mt-2 text-xs text-body">
-                {PUBLIC_AGENT.name} · {item.date} · {item.length}
+                {profile.name} · {item.date} · {item.length}
               </p>
             </div>
           </div>
@@ -581,6 +584,7 @@ function Contact({
   onSubmit: () => void;
   onReset: () => void;
 }) {
+  const { profile } = useAgentProfile();
   return (
     <section id="contact" className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
       <div className="rounded-3xl border border-white/60 bg-white/70 p-8 shadow-lg backdrop-blur-xl sm:p-10">
@@ -589,8 +593,8 @@ function Contact({
             Let&rsquo;s talk
           </h2>
           <p className="mt-2 text-sm text-body">
-            Send a note and {PUBLIC_AGENT.name.split(" ")[0]} will reach out.
-            This form is a placeholder and does not send.
+            Send a note and {profile.name.split(" ")[0]} will reach out. This
+            form is a placeholder and does not send.
           </p>
         </div>
 
@@ -643,11 +647,11 @@ function Contact({
         )}
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-body">
-          <a href={`tel:${PUBLIC_AGENT.phone.replace(/[^0-9+]/g, "")}`}>
-            {PUBLIC_AGENT.phone}
+          <a href={`tel:${profile.phone.replace(/[^0-9+]/g, "")}`}>
+            {profile.phone}
           </a>
-          <a href={`mailto:${PUBLIC_AGENT.email}`}>{PUBLIC_AGENT.email}</a>
-          <span>{PUBLIC_AGENT.license}</span>
+          <a href={`mailto:${profile.email}`}>{profile.email}</a>
+          <span>{profile.license}</span>
         </div>
         <p className="mt-3 text-center text-xs text-body">
           Serving {SERVICE_AREAS.slice(0, 6).join(", ")}, and more.

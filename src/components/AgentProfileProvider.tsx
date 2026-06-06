@@ -7,11 +7,12 @@ import {
   useMemo,
   useState,
 } from "react";
-import { headshot } from "@/lib/mock/images";
+import { headshot, familyPhoto } from "@/lib/mock/images";
 
 // The agent's own profile. Editable in Settings, persisted to localStorage,
-// and read anywhere that should feel personalized: the nav chip and the
-// branded calculator printouts. Defaults to the fabricated sample agent.
+// and read anywhere that should feel personalized: the nav chip, the branded
+// calculator printouts, and the public client page. Defaults to the
+// fabricated sample agent.
 export interface AgentProfile {
   name: string;
   title: string;
@@ -25,6 +26,12 @@ export interface AgentProfile {
   // Mailing address line for the email signature.
   address: string;
   photo: string;
+  // Editable public-page content.
+  headline: string;
+  tagline: string;
+  bio: string;
+  specialties: string[];
+  aboutPhoto: string;
 }
 
 export const DEFAULT_PROFILE: AgentProfile = {
@@ -38,6 +45,18 @@ export const DEFAULT_PROFILE: AgentProfile = {
   license: "DRE# 02000000",
   address: "4299 MacArthur Blvd, Suite 105, Newport Beach, CA 92660",
   photo: headshot(0, 400),
+  headline: "Your trusted guide to Orange County real estate.",
+  tagline:
+    "Intentional, reliable, and rooted in experience. I help clients navigate real estate with clarity, commitment, and care.",
+  bio: "I was born and raised in Orange County, and I still can't imagine living anywhere else. When I'm not helping clients find their next home, you'll find me at the beach with my wife and two kids, coaching weekend soccer, or hunting down the best taco spot in town. Real estate is personal for me. I treat every client like a neighbor, because most of them become one. This is fabricated sample content for a reference design.",
+  specialties: [
+    "Buyer's Agent",
+    "Listing Agent",
+    "Luxury",
+    "Investment Properties",
+    "Relocation",
+  ],
+  aboutPhoto: familyPhoto(0, 900),
 };
 
 const STORAGE_KEY = "mr-agent-profile";
