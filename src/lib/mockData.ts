@@ -591,6 +591,7 @@ export const hubEntries: HubEntry[] = [
   { name: "Pipeline", desc: "Your deals from request to close", href: "/pipeline" },
   { name: "Listings", desc: "Your active listings and status", href: "/listings" },
   { name: "Marketing Studio", desc: "Build branded client-ready material", href: "/marketing" },
+  { name: "Tour Builder", desc: "Build a branded property tour to share", href: "/tour-builder" },
   { name: "Marketing Shop", desc: "Order mailers, signs, cards, and swag", href: "/shop" },
   { name: "Production", desc: "Commissions, goals, leaderboard", href: "/production" },
   { name: "Calculators", desc: "Net sheet, affordability, commission", href: "/calculators" },

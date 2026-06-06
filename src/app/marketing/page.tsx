@@ -38,12 +38,20 @@ export default function MarketingPage() {
                 live and carries your details.
               </p>
             </div>
-            <Link
-              href="/shop"
-              className="flex-none rounded-full bg-mr-base px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-mr-mid"
-            >
-              Order printed materials
-            </Link>
+            <div className="flex flex-none flex-wrap gap-2">
+              <Link
+                href="/tour-builder"
+                className="rounded-full border border-mr-base/20 bg-white/70 px-5 py-3 text-sm font-semibold text-mr-base shadow-sm transition-colors hover:bg-white"
+              >
+                Build a property tour
+              </Link>
+              <Link
+                href="/shop"
+                className="rounded-full bg-mr-base px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-mr-mid"
+              >
+                Order printed materials
+              </Link>
+            </div>
           </header>
 
           <BrandBar />
