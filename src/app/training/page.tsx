@@ -1,8 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import { COURSES, TRACKS, type Course, type Track } from "@/lib/mock/training";
+import {
+  INTERACTIVE_COURSES,
+  courseLessons,
+  loadCourseProgress,
+} from "@/lib/mock/courses";
 
 type TrackFilter = "All" | Track;
 
@@ -104,6 +110,23 @@ export default function TrainingPage() {
         </div>
       </div>
 
+      {/* Guided interactive courses (built from real MR training material) */}
+      <section className="mb-8">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className="font-heading text-xl font-bold text-mr-dark">
+            Guided courses
+          </h2>
+          <span className="text-xs text-body">
+            Interactive lessons, checkpoints, and takeaways
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {INTERACTIVE_COURSES.map((c) => (
+            <GuidedCourseCard key={c.id} courseId={c.id} />
+          ))}
+        </div>
+      </section>
+
       <div className="mb-6 flex flex-wrap gap-2">
         {(["All", ...TRACKS] as TrackFilter[]).map((t) => (
           <button
@@ -135,6 +158,51 @@ export default function TrainingPage() {
         />
       ) : null}
     </PageShell>
+  );
+}
+
+// Rich card for the guided interactive courses with live saved progress.
+function GuidedCourseCard({ courseId }: { courseId: string }) {
+  const course = INTERACTIVE_COURSES.find((c) => c.id === courseId)!;
+  const lessons = courseLessons(course);
+  const totalMin = lessons.reduce((s, l) => s + l.minutes, 0);
+  const [doneCount, setDoneCount] = useState(0);
+
+  useEffect(() => {
+    setDoneCount(loadCourseProgress(course.id).length);
+  }, [course.id]);
+
+  const pct = Math.round((doneCount / lessons.length) * 100);
+
+  return (
+    <Link
+      href={`/training/${course.id}`}
+      className="group flex flex-col overflow-hidden rounded-2xl border border-white/60 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-mr-light"
+    >
+      <div className="bg-gradient-to-br from-mr-dark to-mr-base p-5 text-white">
+        <div className="flex items-center justify-between">
+          <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-semibold">
+            {course.category}
+          </span>
+          <span className="text-xs text-mr-pale">
+            {lessons.length} lessons · {totalMin} min
+          </span>
+        </div>
+        <h3 className="mt-3 font-heading text-lg font-bold">{course.title}</h3>
+        <p className="mt-1 text-sm text-white/80">{course.summary}</p>
+      </div>
+      <div className="flex items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+        <div className="h-2 flex-1 overflow-hidden rounded-full bg-mr-pale/25">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-mr-base to-mr-light transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <span className="text-xs font-semibold text-mr-base">
+          {pct === 100 ? "Complete" : pct === 0 ? "Start course →" : `${pct}% · continue →`}
+        </span>
+      </div>
+    </Link>
   );
 }
 

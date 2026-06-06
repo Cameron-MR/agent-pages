@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import PageShell from "@/components/PageShell";
+import { RESOURCE_DOCS } from "@/lib/mock/resourceDocs";
 import {
   RESOURCE_CATEGORIES,
   RESOURCES,
@@ -67,6 +69,44 @@ export default function ResourcesPage() {
       title="Resources & Scripts"
       description="Talk tracks, checklists, guides, and templates for every conversation. Placeholder content."
     >
+      {/* Playbooks: full live documents with print-to-PDF */}
+      <section className="mb-8">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className="font-heading text-xl font-bold text-mr-dark">
+            Playbooks
+          </h2>
+          <span className="text-xs text-body">
+            Live documents · check off as you work · download as PDF
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {RESOURCE_DOCS.map((d) => (
+            <Link
+              key={d.id}
+              href={`/resources/${d.id}`}
+              className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/60 bg-white/70 shadow-sm backdrop-blur transition duration-200 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-mr-light"
+            >
+              <div className="bg-gradient-to-r from-mr-dark to-mr-base px-4 py-3">
+                <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-mr-pale">
+                  {d.category} · {d.audience}
+                </p>
+                <p className="mt-0.5 font-heading text-sm font-bold text-white">
+                  {d.title}
+                </p>
+              </div>
+              <div className="flex flex-1 flex-col p-4">
+                <p className="flex-1 text-xs leading-relaxed text-body">
+                  {d.intro}
+                </p>
+                <p className="mt-3 text-xs font-semibold text-mr-base transition-colors group-hover:text-mr-mid">
+                  Open the playbook → · {d.minutes} min
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           {(["All", "Favorites", ...RESOURCE_CATEGORIES] as CategoryFilter[]).map((cat) => (

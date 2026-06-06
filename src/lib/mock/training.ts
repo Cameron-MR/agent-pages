@@ -1,7 +1,16 @@
 // Mock data for the Training page (/training).
-// Fabricated course catalog with placeholder progress. Not real curriculum.
+// Fabricated course catalog with placeholder progress. Not real curriculum
+// except the guided interactive courses (see courses.ts), which are built
+// from real Marshall Reddick training material.
 
-export type Track = "Onboarding" | "Sales" | "Marketing" | "Technology";
+export type Track =
+  | "New Agent"
+  | "Sales"
+  | "Listing"
+  | "Leasing"
+  | "Marketing"
+  | "CRM"
+  | "How To";
 
 export interface Course {
   id: string;
@@ -14,17 +23,20 @@ export interface Course {
 }
 
 export const TRACKS: Track[] = [
-  "Onboarding",
+  "New Agent",
   "Sales",
+  "Listing",
+  "Leasing",
   "Marketing",
-  "Technology",
+  "CRM",
+  "How To",
 ];
 
 export const COURSES: Course[] = [
   {
     id: "t1",
     title: "Your first 30 days",
-    track: "Onboarding",
+    track: "New Agent",
     lessons: 8,
     completedLessons: 8,
     minutes: 95,
@@ -33,7 +45,7 @@ export const COURSES: Course[] = [
   {
     id: "t2",
     title: "Brand and compliance basics",
-    track: "Onboarding",
+    track: "New Agent",
     lessons: 5,
     completedLessons: 3,
     minutes: 40,
@@ -51,7 +63,7 @@ export const COURSES: Course[] = [
   {
     id: "t4",
     title: "Listing mastery",
-    track: "Sales",
+    track: "Listing",
     lessons: 12,
     completedLessons: 2,
     minutes: 150,
@@ -87,7 +99,7 @@ export const COURSES: Course[] = [
   {
     id: "t8",
     title: "CRM fundamentals",
-    track: "Technology",
+    track: "CRM",
     lessons: 8,
     completedLessons: 5,
     minutes: 60,
@@ -96,10 +108,28 @@ export const COURSES: Course[] = [
   {
     id: "t9",
     title: "MLS and comps",
-    track: "Technology",
+    track: "How To",
     lessons: 6,
     completedLessons: 0,
     minutes: 50,
     summary: "Search, comps, and clean listing entry.",
+  },
+  {
+    id: "t10",
+    title: "Leasing and property management basics",
+    track: "Leasing",
+    lessons: 7,
+    completedLessons: 0,
+    minutes: 65,
+    summary: "Lease terms, tenant screening, and working with PM teams.",
+  },
+  {
+    id: "t11",
+    title: "Working investor clients",
+    track: "Sales",
+    lessons: 8,
+    completedLessons: 0,
+    minutes: 90,
+    summary: "Cash flow, cap rates, and advising buy-and-hold investors.",
   },
 ];

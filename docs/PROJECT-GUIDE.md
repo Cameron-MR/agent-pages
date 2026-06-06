@@ -216,6 +216,35 @@ shape; a `save*()` writes JSON; builder pages write, client pages read on mount.
 
 Newest first. Add an entry each working session.
 
+- **Content control, real partners, BuyAbility, playbooks, guided courses.**
+  - Page builder gained a Photos manager: add lifestyle carousel photos from
+    an approved library or by URL, remove with one click; the public About
+    carousel renders them (`PageContent.photos`).
+  - Preferred vendors are the real MR partners (Reed Hazard / CMG Home
+    Loans, Andrew Walsh / WFG National Title, Rubi Lopez / WFG National
+    Escrow, Steve Page / Snug Harbor Insurance) with phone, email, and
+    Visit website links; fully editable in the builder.
+  - Events auto-sync from a mock CRM feed and education from the agent's
+    library (both marked TODO for live integration); agent-added items
+    ("Mine") layer on top and persist. Events link out to details;
+    education links to the full video/article.
+  - New `BuyAbility` calculator (Zillow BuyAbility style): location, credit
+    tier, income, down payment, monthly debt → target price with gauge,
+    target payment, lender ceiling, and loan details. Lives in /calculators
+    ("Can I buy a home?") and on the public page, where it ends in a
+    pre-qualification CTA to the agent's preferred lender.
+  - Resources "Playbooks": 8 real MR checklists/guides (buyer's agent,
+    buyer, open house, listing agent, qualifying a buyer, seller,
+    submitting an offer, price reduction) as live branded documents at
+    `/resources/[docId]` with persistent interactive checkboxes, progress,
+    and a print-to-PDF sheet (`resourceDocs.ts`).
+  - Training reorganized into categories (New Agent, Sales, Listing,
+    Leasing, Marketing, CRM, How To) and gained two guided interactive
+    courses at `/training/[courseId]` (`courses.ts`): the Webinar Speaker
+    Playbook and the Reddick Property Rating property classes course
+    (from the MR ebook), with module sidebar, checkpoint quizzes with
+    instant feedback, a live property class classifier widget, takeaways,
+    per-device progress (`mr-course-*`), and a completion screen.
 - **Mobile tab bar + post scheduling.**
   - App-style bottom tab bar on phones (`MobileTabBar.tsx`, mounted in
     Providers): Home, Pipeline, Listings, Marketing, CMA. Hidden at md+, on
